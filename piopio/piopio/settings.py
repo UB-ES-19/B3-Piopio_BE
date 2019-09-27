@@ -77,9 +77,9 @@ from piopio.database_utils import get_env_variable
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': get_env_variable('DATABASE_NAME'),
-        'USER': get_env_variable('DATABASE_USER'),
-        'PASSWORD': get_env_variable('DATABASE_PASSWORD'),
+        'NAME': 'sys',
+        'USER': 'root',
+        'PASSWORD': 'Lx199642',
         'HOST': 'localhost',
         'PORT': '3306',
     }
