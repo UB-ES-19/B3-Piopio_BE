@@ -77,14 +77,16 @@ from piopio.database_utils import get_env_variable
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': get_env_variable('Piopio'),
-        'USER': get_env_variable('root'),
-        'PASSWORD': get_env_variable('Lx199642'),
+        'NAME': get_env_variable('DATABASE_NAME'),
+        'USER': get_env_variable('DATABASE_USER'),
+        'PASSWORD': get_env_variable('DATABASE_PASSWORD'),
         'HOST': 'localhost',
         'PORT': '3306',
     }
 }
 
+# Custom user model
+AUTH_USER_MODEL = 'piopio_be.User'
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
