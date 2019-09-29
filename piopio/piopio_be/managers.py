@@ -2,27 +2,37 @@ from django.contrib.auth.base_user import BaseUserManager
 from django.utils.translation import ugettext_lazy as _
 import piopio_be.models
 
+
 class PiopioUserManager(BaseUserManager):
     """
     Custom user model manager where email is the unique identifiers
     for authentication instead of usernames.
     """
-    def create(self, email, username, password, **extra_fields):
+    def create(self, email, username, password, profile, **extra_fields):
         """
         Create and save a User with the given email and password.
         """
-        if not email or not password:
-            raise ValueError(_('The Email must be set'))
+        if not email:
+            raise ValueError('Email address is required.')
+        if not username:
+            raise ValueError('Username is required.')
+        if not profile:
+            raise ValueError('Profile is required.')
 
-        # Other checks
-        email = self.normalize_email(email)
-
-        # Create User profile
-        extra_fields["profile"] = piopio_be.models.Profile.objects.create()
-        user = self.model(email=email, username=username, **extra_fields)
+        # Create and save User
+        user = self.model(
+            email=self.normalize_email(email),
+            username=username,
+        )
         user.set_password(password)
-
         user.save()
+        # Create and save Profile
+        profile = piopio_be.models.Profile(
+            first_name=profile.get('first_name'),
+            last_name=profile.get('last_name'),
+            user=user
+        )
+        profile.save()
         return user
 
     def create_superuser(self, email, username, password, **extra_fields):
