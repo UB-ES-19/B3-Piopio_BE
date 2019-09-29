@@ -19,5 +19,5 @@ from django.conf.urls import include, url
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('piopio/', include('piopio_be.urls'))
+    path('api/', include('piopio_be.urls'))
 ]
