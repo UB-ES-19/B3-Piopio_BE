@@ -1,10 +1,8 @@
 # API serializers
 from rest_framework import serializers, exceptions
-from piopio_be import messages
 from piopio_be.models import User, Profile
 from django.contrib.auth.password_validation import validate_password
 from django.core import exceptions
-from django.db import IntegrityError, transaction
 
 
 class UserProfileSerializer(serializers.ModelSerializer):

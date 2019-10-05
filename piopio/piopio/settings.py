@@ -72,6 +72,14 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'piopio.wsgi.application'
 
+# Custom backend to authenticate with email or username
+AUTHENTICATION_BACKENDS = ['piopio_be.authentication.EmailOrUsernameAuthentication']
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
+}
 
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
