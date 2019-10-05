@@ -3,3 +3,4 @@ django-cors-headers
 djangorestframework
 Pillow>=6.1.0
 mysqlclient
+djangorestframework_simplejwt

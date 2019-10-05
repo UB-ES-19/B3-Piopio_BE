@@ -1,10 +1,6 @@
-from django.shortcuts import render
 from rest_framework import generics, status, views, viewsets
 from piopio_be import serializers, models
-from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework import permissions
-from rest_framework_simplejwt.views import TokenViewBase
 import rest_framework_simplejwt
 
 
@@ -36,7 +32,3 @@ class UserView(viewsets.ModelViewSet):
             raise rest_framework_simplejwt.exceptions.AuthenticationFailed(
                 self.error_messages['required_credentials']
             )
-
-
-class MyTokenObtainPairView(TokenViewBase):
-    serializer_class = serializers.TokenObtainPairSerializer
