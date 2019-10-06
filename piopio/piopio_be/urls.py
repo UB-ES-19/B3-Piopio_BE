@@ -5,7 +5,7 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
     TokenVerifyView
 )
-from django.urls import path
+from django.urls import path, re_path
 
 router = DefaultRouter()
 router.register("users", views.UserView)
