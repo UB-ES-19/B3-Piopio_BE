@@ -62,7 +62,7 @@ Content-Type: application/json
 ```
 
 ## Users
-##### List Users:
+#### List Users:
 ```
 GET /api/users/
 Host: localhost:8000
@@ -87,7 +87,7 @@ Content-Type: application/json
     ...
 ]
 ```
-##### Get User:
+#### Get User:
 ```
 GET /api/users/<id or username>/
 Host: localhost:8000
@@ -117,7 +117,7 @@ Content-Type: application/json
 }
 ```
 
-##### Create User:
+#### Create User:
 
 ```
 POST /api/users/
@@ -177,7 +177,7 @@ Content-Type: application/json
     ]
 }
 ```
-##### Edit User:
+#### Edit User:
 
 ```
 POST /api/users/<id>/
