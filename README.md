@@ -103,8 +103,8 @@ Content-Type: application/json
     "username": "test",
     "email": "test@test.com",
     "profile": {
-        "first_name": "asdas",
-        "last_name": "adzz"
+        "first_name": "test",
+        "last_name": "test"
     }
 }
 ```
@@ -144,11 +144,11 @@ Content-Type: application/json
 
 {
     "id": 2,
-    "username": "test",
-    "email": "test@test.com",
+    "username": "user",
+    "email": "user@mail.com",
     "profile": {
-        "first_name": "asdas",
-        "last_name": "adzz"
+        "first_name": "user",
+        "last_name": "user"
     }
 }
 ```
