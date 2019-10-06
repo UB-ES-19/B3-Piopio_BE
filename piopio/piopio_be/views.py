@@ -26,13 +26,16 @@ class UserView(viewsets.ModelViewSet):
         return serializers.UserDefaultSerializer
 
     def retrieve(self, request, *args, **kwargs):
-        print(kwargs['pk'])
         if kwargs['pk'].isdigit():
             return super(UserView, self).retrieve(request, *args, **kwargs)
         else:
+            print(kwargs['pk'])
             q = self.queryset.filter(username=kwargs['pk']).first()
+            if q is None:
+                return Response({'detail': 'User Not Found'}, status.HTTP_404_NOT_FOUND)
             s = self.get_serializer(q)
             return Response(s.data)
+
 
     @action(methods=['GET'], detail=False, permission_classes=(IsAuthenticated,), url_path="me", url_name="user_me")
     def me(self, request):
