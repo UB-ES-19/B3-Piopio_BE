@@ -1,4 +1,5 @@
 # API serializers
+from drf_writable_nested import WritableNestedModelSerializer
 from rest_framework import serializers, exceptions
 from piopio_be.models import User, Profile
 from django.contrib.auth.password_validation import validate_password
@@ -15,6 +16,20 @@ class UserProfileSerializer(serializers.ModelSerializer):
         fields = [
             'first_name',
             'last_name'
+        ]
+
+
+class UserDefaultSerializer(WritableNestedModelSerializer):
+
+    profile = UserProfileSerializer(required=True)
+
+    class Meta:
+        model = User
+        fields = [
+            "id",
+            "username",
+            "email",
+            "profile",
         ]
 
 
@@ -52,15 +67,3 @@ class UserCreateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = User.objects.create(**validated_data)
         return user
-
-
-class UserSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(style={"input_type": "password"}, write_only=True)
-
-    class Meta:
-        model = User
-        fields = (
-            User.USERNAME_FIELD,
-            "email",
-            'password'
-        )
