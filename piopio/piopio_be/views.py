@@ -45,7 +45,7 @@ class UserView(viewsets.ModelViewSet):
 
 
 class PostView(viewsets.ModelViewSet):
-    posts = models.Post.objects.all()
+    queryset = models.Post.objects.all()
     serializer_class = serializers.PostSerializer
 
     @api_view(['GET', 'POST'])
