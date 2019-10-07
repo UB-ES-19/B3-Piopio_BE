@@ -219,3 +219,112 @@ Content-Type: application/json
     "detail": "You are not the owner of this user profile."
 }
 ```
+
+#### Get All Posts:
+
+```
+GET /api/posts/
+Host: localhost:8000
+Content-Type: application/json
+```
+Response
+```
+HTTP 200 OK
+Allow: GET, POST, HEAD, OPTIONS
+Content-Type: application/json
+Vary: Accept
+
+[
+    {
+        "id": 2,
+        "content": "asdasda",
+        "created_at": "2019-10-07T18:42:09.566717Z",
+        "user": 1
+    },
+    {
+        "id": 3,
+        "content": "dkpqwkepqweqweq",
+        "created_at": "2019-10-07T22:24:54.970843Z",
+        "user": 1
+    }
+]
+```
+#### Get Post by ID:
+```
+GET /api/posts/<post_id>
+Host: localhost:8000
+Content-Type: application/json
+```
+Response
+```
+HTTP 200 OK
+Allow: GET, PUT, PATCH, DELETE, HEAD, OPTIONS
+Content-Type: application/json
+Vary: Accept
+
+{
+    "id": 2,
+    "content": "asdasda",
+    "created_at": "2019-10-07T18:42:09.566717Z",
+    "user": 1
+}
+```
+```
+HTTP 404 Not Found
+Allow: GET, PUT, PATCH, DELETE, HEAD, OPTIONS
+Content-Type: application/json
+Vary: Accept
+
+{
+    "detail": "Not found."
+}
+```
+#### Publish Post:
+```
+POST /api/posts/
+Host: localhost:8000
+Content-Type: application/json
+Accept: application/json
+
+{
+    "content": "asdasda",
+    "user": <user_id>
+}
+```
+Response
+```
+HTTP 201 Created
+Allow: GET, POST, HEAD, OPTIONS
+Content-Type: application/json
+Vary: Accept
+
+{
+    "id": 5,
+    "content": "asdasda",
+    "created_at": "2019-10-07T22:40:03.694644Z",
+    "user": 1
+}
+```
+#### Delete Post by ID:
+```
+DELETE /api/posts/<post_id>
+Host: localhost:8000
+Content-Type: application/json
+```
+Response
+```
+HTTP 204 No Content
+Allow: GET, PUT, PATCH, DELETE, HEAD, OPTIONS
+Content-Type: application/json
+Vary: Accept
+```
+```
+HTTP 404 Not Found
+Allow: GET, PUT, PATCH, DELETE, HEAD, OPTIONS
+Content-Type: application/json
+Vary: Accept
+
+{
+    "detail": "Not found."
+}
+```
