@@ -9,6 +9,7 @@ from django.urls import path, re_path
 
 router = DefaultRouter()
 router.register("users", views.UserView)
+router.register("posts", views.PostView)
 
 urlpatterns = router.urls
 

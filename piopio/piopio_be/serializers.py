@@ -1,7 +1,7 @@
 # API serializers
 from drf_writable_nested import WritableNestedModelSerializer
 from rest_framework import serializers, exceptions
-from piopio_be.models import User, Profile
+from piopio_be.models import User, Profile,Post
 from django.contrib.auth.password_validation import validate_password
 from django.core import exceptions
 
@@ -67,3 +67,9 @@ class UserCreateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = User.objects.create(**validated_data)
         return user
+
+class PostSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        fields = ('id' , 'created_at', 'updated_at', 'user')
+        model = Post
