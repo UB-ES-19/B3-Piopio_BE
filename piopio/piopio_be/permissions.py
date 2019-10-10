@@ -34,3 +34,11 @@ class IsUserOwner(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         return obj == request.user
+
+
+class IsUserOwnerOrAdmin(permissions.BasePermission):
+
+    message = 'You are not the owner of this user profile.'
+
+    def has_object_permission(self, request, view, obj):
+        return obj == request.user or request.user.is_superuser

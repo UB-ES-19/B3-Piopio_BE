@@ -68,8 +68,17 @@ class UserCreateSerializer(serializers.ModelSerializer):
         user = User.objects.create(**validated_data)
         return user
 
+
 class PostSerializer(serializers.ModelSerializer):
 
     class Meta:
-        fields = ('id','content', 'created_at', 'user')
+        fields = ('id', 'content', 'created_at')
+        model = Post
+
+
+class PostSerializerWithUser(PostSerializer):
+    user = UserDefaultSerializer()
+
+    class Meta:
+        fields = ('id', 'content', 'created_at', 'user')
         model = Post

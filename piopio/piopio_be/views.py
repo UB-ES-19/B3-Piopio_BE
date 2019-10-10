@@ -44,26 +44,42 @@ class UserView(viewsets.ModelViewSet):
         return Response(s.data)
 
 
+class PostsFromUserView(viewsets.ReadOnlyModelViewSet):
+    """
+    Nested view for retrieving and listing the posts of a user
+    """
+    queryset = models.Post.objects.all().order_by('created_at')
+    permission_classes = (IsAuthenticated,)
+
+    def list(self, request, user_pk=None, *args, **kwargs):
+        posts = self.get_queryset().filter(user_id=user_pk).values()
+        serialized_posts = serializers.PostSerializer(posts, many=True)
+        return Response(serialized_posts.data)
+
+    def retrieve(self, request, pk=None, user_pk=None, *args, **kwargs):
+        posts = self.get_queryset().get(pk=pk)
+        serialized_posts = serializers.PostSerializer(posts)
+        return Response(serialized_posts.data)
+
+
 class PostView(viewsets.ModelViewSet):
-    queryset = models.Post.objects.all()
-    serializer_class = serializers.PostSerializer
+    queryset = models.Post.objects.all().order_by('created_at')
+    serializer_class = serializers.PostSerializerWithUser
+    permission_classes = (permissions.PermissionMapper,)
+    has_permissions = {
+        IsAuthenticated: ['create'],
+    }
 
-    @api_view(['GET', 'POST'])
-    def post_list(self, request):
-        """
-            Retrieve all post.
-        """
-        if request.method == 'GET':
-            posts = models.Post.objects.all()
-            serializer = serializers.PostSerializer(posts, many=True)
-            return Response(serializer.data)
+    has_object_permissions = {
+        permissions.IsUserOwnerOrAdmin: ['update', 'partial_update', 'destroy'],
+    }
 
-        elif request.method == 'POST':
-            serializer = serializers.PostSerializer(data=request.data)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def create(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(user_id=request.user.pk)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     @api_view(['GET', 'PUT', 'DELETE'])
     def post_detail(self, request, pk):
@@ -76,13 +92,13 @@ class PostView(viewsets.ModelViewSet):
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         if request.method == 'GET':
-            serializer = serializers.PostSerializer(post)
+            serializer = self.serializer_class(post)
             return Response(serializer.data)
 
         elif request.method == 'PUT':
-            serializer = serializers.PostSerializer(post, data=request.data)
+            serializer = self.serializer_class(post, data=request.data)
             if serializer.is_valid():
-                serializer.save()
+                serializer.save(user_id=request.user.pk)
                 return Response(serializer.data)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -90,3 +106,13 @@ class PostView(viewsets.ModelViewSet):
             post.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
+    @action(methods=['GET'], detail=False, permission_classes=(IsAuthenticated,), url_path="me",
+            url_name="posts_me")
+    def me(self, request):
+        """
+        Returns the list of the authenticated user's posts.
+        """
+        user = request.user
+        posts = self.get_queryset().filter(user_id=user.pk).values()
+        serialized_posts = serializers.PostSerializer(posts, many=True)
+        return Response(serialized_posts.data)

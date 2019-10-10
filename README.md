@@ -72,20 +72,31 @@ Response
 ```
 Status: 200 OK
 Content-Type: application/json
-[
-    {
-        "id": 1,
-        "username": "test",
-        "email": "user@test.com",
-        "profile": {
-            "first_name": "test",
-            "last_name": "test"
+{
+    "count": 2,
+    "next": null,
+    "previous": null,
+    "results": [
+        {
+            "id": 1,
+            "username": "pepe",
+            "email": "pepe@gmail.com",
+            "profile": {
+                "first_name": "pepe",
+                "last_name": "manuel"
+            }
+        },
+        {
+            "id": 2,
+            "username": "antonio",
+            "email": "antonio@gmail.com",
+            "profile": {
+                "first_name": "pepe",
+                "last_name": "manuel"
+            }
         }
-    },
-    {
-        "id": 2,
-    ...
-]
+    ]
+}
 ```
 #### Get User:
 ```
@@ -220,7 +231,7 @@ Content-Type: application/json
 }
 ```
 
-#### Get All Posts:
+#### Get All Posts (with pagination):
 
 ```
 GET /api/posts/
@@ -234,20 +245,41 @@ Allow: GET, POST, HEAD, OPTIONS
 Content-Type: application/json
 Vary: Accept
 
-[
-    {
-        "id": 2,
-        "content": "asdasda",
-        "created_at": "2019-10-07T18:42:09.566717Z",
-        "user": 1
-    },
-    {
-        "id": 3,
-        "content": "dkpqwkepqweqweq",
-        "created_at": "2019-10-07T22:24:54.970843Z",
-        "user": 1
-    }
-]
+{
+    "count": 2,
+    "next": null,
+    "previous": null,
+    "results": [
+        {
+            "id": 1,
+            "content": "hola, buenas",
+            "created_at": "2019-10-09T17:50:54.544053Z",
+            "user": {
+                "id": 1,
+                "username": "pepe",
+                "email": "pepe@gmail.com",
+                "profile": {
+                    "first_name": "pepe",
+                    "last_name": "manuel"
+                }
+            }
+        },
+        {
+            "id": 2,
+            "content": "hey, que tal",
+            "created_at": "2019-10-09T22:19:38.395935Z",
+            "user": {
+                "id": 1,
+                "username": "pepe",
+                "email": "pepe@gmail.com",
+                "profile": {
+                    "first_name": "pepe",
+                    "last_name": "manuel"
+                }
+            }
+        }
+    ]
+}
 ```
 #### Get Post by ID:
 ```
@@ -327,4 +359,82 @@ Vary: Accept
 {
     "detail": "Not found."
 }
+```
+### Get posts from authenticated user
+```
+GET /api/users/posts/me/
+Host: localhost:8000
+Content-Type: application/json
+```
+```
+HTTP 200 OK
+Allow: GET, HEAD, OPTIONS
+Content-Type: application/json
+Vary: Accept
+[
+    {
+        "id": 1,
+        "content": "hola, buenas",
+        "created_at": "2019-10-09T17:50:54.544053Z"
+    },
+    {
+        "id": 2,
+        "content": "hey, que tal",
+        "created_at": "2019-10-09T22:19:38.395935Z"
+    },
+    {
+        "id": 3,
+        "content": "Antonio",
+        "created_at": "2019-10-10T17:43:14.854128Z"
+    },
+    {
+        "id": 4,
+        "content": "Antonio",
+        "created_at": "2019-10-10T17:43:47.348349Z"
+    },
+    {
+        "id": 5,
+        "content": "Antonio",
+        "created_at": "2019-10-10T17:44:15.047570Z"
+    }
+]
+```
+#### Get user's posts:
+```
+GET /api/users/<user_id>/posts/
+Host: localhost:8000
+Content-Type: application/json
+```
+```
+HTTP 200 OK
+Allow: GET, HEAD, OPTIONS
+Content-Type: application/json
+Vary: Accept
+[
+    {
+        "id": 1,
+        "content": "hola, buenas",
+        "created_at": "2019-10-09T17:50:54.544053Z"
+    },
+    {
+        "id": 2,
+        "content": "hey, que tal",
+        "created_at": "2019-10-09T22:19:38.395935Z"
+    },
+    {
+        "id": 3,
+        "content": "Antonio",
+        "created_at": "2019-10-10T17:43:14.854128Z"
+    },
+    {
+        "id": 4,
+        "content": "Antonio",
+        "created_at": "2019-10-10T17:43:47.348349Z"
+    },
+    {
+        "id": 5,
+        "content": "Antonio",
+        "created_at": "2019-10-10T17:44:15.047570Z"
+    }
+]
 ```
