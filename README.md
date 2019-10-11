@@ -241,9 +241,7 @@ Content-Type: application/json
 Response
 ```
 HTTP 200 OK
-Allow: GET, POST, HEAD, OPTIONS
 Content-Type: application/json
-Vary: Accept
 
 {
     "count": 2,
@@ -281,6 +279,39 @@ Vary: Accept
     ]
 }
 ```
+```
+GET /api/posts/?limit=1
+Host: localhost:8000
+Content-Type: application/json
+```
+Response
+```
+HTTP 200 OK
+Content-Type: application/json
+{
+    "count": 2,
+    "next": "http://localhost:8000/api/posts/?limit=1&offset=1",
+    "previous": null,
+    "results": [
+        {
+            "id": 1,
+            "content": "content",
+            "created_at": "2019-10-11T15:05:05.973332Z",
+            "user": {
+                "id": 2,
+                "username": "user",
+                "email": "user@mail.com",
+                "profile": {
+                    "first_name": "user",
+                    "last_name": "user"
+                }
+            }
+        }
+    ]
+}
+```
+
+
 #### Get Post by ID:
 ```
 GET /api/posts/<post_id>
@@ -290,22 +321,26 @@ Content-Type: application/json
 Response
 ```
 HTTP 200 OK
-Allow: GET, PUT, PATCH, DELETE, HEAD, OPTIONS
 Content-Type: application/json
-Vary: Accept
 
 {
     "id": 2,
-    "content": "asdasda",
+    "content": "content",
     "created_at": "2019-10-07T18:42:09.566717Z",
-    "user": 1
+    "user": {
+        "id": 2,
+        "username": "user",
+        "email": "user@mail.com",
+        "profile": {
+            "first_name": "user",
+            "last_name": "user"
+        }
+    }
 }
 ```
 ```
 HTTP 404 Not Found
-Allow: GET, PUT, PATCH, DELETE, HEAD, OPTIONS
 Content-Type: application/json
-Vary: Accept
 
 {
     "detail": "Not found."
@@ -317,47 +352,99 @@ POST /api/posts/
 Host: localhost:8000
 Content-Type: application/json
 Accept: application/json
+Authorization: Bearer <access token>
 
 {
-    "content": "asdasda",
-    "user": <user_id>
+    "content": "<content>"
 }
 ```
 Response
 ```
 HTTP 201 Created
-Allow: GET, POST, HEAD, OPTIONS
 Content-Type: application/json
-Vary: Accept
 
 {
-    "id": 5,
-    "content": "asdasda",
-    "created_at": "2019-10-07T22:40:03.694644Z",
-    "user": 1
+    "id": 3,
+    "content": "<content>",
+    "created_at": "2019-10-11T15:23:34.257337Z",
+    "user": {
+        "id": 2,
+        "username": "user",
+        "email": "user@mail.com",
+        "profile": {
+            "first_name": "user",
+            "last_name": "user"
+        }
+    }
 }
 ```
-#### Delete Post by ID:
+#### Update Post:
 ```
-DELETE /api/posts/<post_id>
+PUT /api/posts/<post_id>/
 Host: localhost:8000
 Content-Type: application/json
+Accept: application/json
+Authorization: Bearer <access token>
+
+{
+    "content": "<new content>"
+}
+```
+Response
+```
+HTTP 200 OK
+Content-Type: application/json
+
+{
+    "id": 2,
+    "content": "<new content>",
+    "created_at": "2019-10-11T15:05:05.973332Z",
+    "user": {
+        "id": 2,
+        "username": "user",
+        "email": "user@mail.com",
+        "profile": {
+            "first_name": "user",
+            "last_name": "user"
+        }
+    }
+}
+```
+```
+HTTP 403 Forbidden
+Content-Type: application/json
+
+{
+    "detail": "You are not the owner of this post."
+}
+```
+
+#### Delete Post by ID:
+```
+DELETE /api/posts/<post_id>/
+Host: localhost:8000
+Content-Type: application/json
+Authorization: Bearer <access token>
 ```
 Response
 ```
 HTTP 204 No Content
-Allow: GET, PUT, PATCH, DELETE, HEAD, OPTIONS
 Content-Type: application/json
-Vary: Accept
 ```
 ```
 HTTP 404 Not Found
-Allow: GET, PUT, PATCH, DELETE, HEAD, OPTIONS
 Content-Type: application/json
-Vary: Accept
 
 {
     "detail": "Not found."
+}
+```
+```
+HTTP 401 Unauthorized
+Content-Type: application/json
+
+{
+    "detail": "Authentication credentials were not provided."
 }
 ```
 ### Get posts from authenticated user
@@ -365,6 +452,7 @@ Vary: Accept
 GET /api/users/posts/me/
 Host: localhost:8000
 Content-Type: application/json
+Authorization: Bearer <access token>
 ```
 ```
 HTTP 200 OK
@@ -404,12 +492,12 @@ Vary: Accept
 GET /api/users/<user_id>/posts/
 Host: localhost:8000
 Content-Type: application/json
+Authorization: Bearer <access token>
 ```
 ```
 HTTP 200 OK
-Allow: GET, HEAD, OPTIONS
 Content-Type: application/json
-Vary: Accept
+
 [
     {
         "id": 1,
