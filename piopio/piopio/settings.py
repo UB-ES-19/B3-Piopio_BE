@@ -78,7 +78,9 @@ AUTHENTICATION_BACKENDS = ['piopio_be.authentication.EmailOrUsernameAuthenticati
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
+    ),
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 100
 }
 
 # Database
@@ -87,9 +89,9 @@ from piopio.database_utils import get_env_variable
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'test',
-        'USER': 'root',
-        'PASSWORD': 'Lx199642',
+        'NAME': get_env_variable("DATABASE_NAME"),
+        'USER': get_env_variable("DATABASE_USER"),
+        'PASSWORD': get_env_variable("DATABASE_PASSWORD"),
         'HOST': 'localhost',
         'PORT': '3306',
     }

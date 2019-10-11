@@ -34,3 +34,11 @@ class IsUserOwner(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         return obj == request.user
+
+
+class IsPostOwner(permissions.BasePermission):
+
+    message = 'You are not the owner of this post.'
+
+    def has_object_permission(self, request, view, obj):
+        return obj.user == request.user
