@@ -36,9 +36,9 @@ class IsUserOwner(permissions.BasePermission):
         return obj == request.user
 
 
-class IsUserOwnerOrAdmin(permissions.BasePermission):
+class IsPostOwner(permissions.BasePermission):
 
-    message = 'You are not the owner of this user profile.'
+    message = 'You are not the owner of this post.'
 
     def has_object_permission(self, request, view, obj):
-        return obj == request.user or request.user.is_superuser
+        return obj.user == request.user

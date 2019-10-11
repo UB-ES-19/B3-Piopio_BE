@@ -75,9 +75,18 @@ class PostSerializer(serializers.ModelSerializer):
         fields = ('id', 'content', 'created_at')
         model = Post
 
+    def create(self, validated_data):
+        user_id = validated_data.pop('user_id')
+        return Post.objects.create(user_id=user_id, **validated_data)
+
+    def update(self, instance, validated_data):
+        instance.content = validated_data.get("content")
+        instance.save()
+        return instance
+
 
 class PostSerializerWithUser(PostSerializer):
-    user = UserDefaultSerializer()
+    user = UserDefaultSerializer(read_only=True)
 
     class Meta:
         fields = ('id', 'content', 'created_at', 'user')

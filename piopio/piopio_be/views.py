@@ -71,8 +71,13 @@ class PostView(viewsets.ModelViewSet):
     }
 
     has_object_permissions = {
-        permissions.IsUserOwnerOrAdmin: ['update', 'partial_update', 'destroy'],
+        permissions.IsPostOwner: ['update', 'partial_update', 'destroy'],
     }
+
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return serializers.PostSerializer
+        return serializers.PostSerializerWithUser
 
     def create(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
@@ -81,33 +86,19 @@ class PostView(viewsets.ModelViewSet):
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
-    @api_view(['GET', 'PUT', 'DELETE'])
-    def post_detail(self, request, pk):
-        """
-        Retrieve, update or delete a post.
-        """
-        try:
-            post = models.Post.objects.get(pk=pk)
-        except post.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(user_id=request.user.pk)
+        if getattr(instance, '_prefetched_objects_cache', None):
+            # If 'prefetch_related' has been applied to a queryset, we need to
+            # forcibly invalidate the prefetch cache on the instance.
+            instance._prefetched_objects_cache = {}
+        return Response(serializer.data)
 
-        if request.method == 'GET':
-            serializer = self.serializer_class(post)
-            return Response(serializer.data)
-
-        elif request.method == 'PUT':
-            serializer = self.serializer_class(post, data=request.data)
-            if serializer.is_valid():
-                serializer.save(user_id=request.user.pk)
-                return Response(serializer.data)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        elif request.method == 'DELETE':
-            post.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-
-    @action(methods=['GET'], detail=False, permission_classes=(IsAuthenticated,), url_path="me",
-            url_name="posts_me")
+    @action(methods=['GET'], detail=False, permission_classes=(IsAuthenticated,), url_path="me", url_name="posts_me")
     def me(self, request):
         """
         Returns the list of the authenticated user's posts.
