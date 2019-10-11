@@ -378,6 +378,14 @@ Content-Type: application/json
     }
 }
 ```
+```
+HTTP 401 Unauthorized
+Content-Type: application/json
+
+{
+    "detail": "Authentication credentials were not provided."
+}
+```
 #### Update Post:
 ```
 PUT /api/posts/<post_id>/
@@ -408,6 +416,22 @@ Content-Type: application/json
             "last_name": "user"
         }
     }
+}
+```
+```
+HTTP 404 Not Found
+Content-Type: application/json
+
+{
+    "detail": "Not found."
+}
+```
+```
+HTTP 401 Unauthorized
+Content-Type: application/json
+
+{
+    "detail": "Authentication credentials were not provided."
 }
 ```
 ```
@@ -445,6 +469,14 @@ Content-Type: application/json
 
 {
     "detail": "Authentication credentials were not provided."
+}
+```
+```
+HTTP 403 Forbidden
+Content-Type: application/json
+
+{
+    "detail": "You are not the owner of this post."
 }
 ```
 ### Get posts from authenticated user
@@ -487,6 +519,14 @@ Vary: Accept
     }
 ]
 ```
+```
+HTTP 401 Unauthorized
+Content-Type: application/json
+
+{
+    "detail": "Authentication credentials were not provided."
+}
+```
 #### Get user's posts:
 ```
 GET /api/users/<user_id>/posts/
@@ -525,4 +565,12 @@ Content-Type: application/json
         "created_at": "2019-10-10T17:44:15.047570Z"
     }
 ]
+```
+```
+HTTP 401 Unauthorized
+Content-Type: application/json
+
+{
+    "detail": "Authentication credentials were not provided."
+}
 ```
