@@ -488,37 +488,77 @@ Authorization: Bearer <access token>
 ```
 ```
 HTTP 200 OK
-Allow: GET, HEAD, OPTIONS
 Content-Type: application/json
-Vary: Accept
-[
-    {
-        "id": 1,
-        "content": "hola, buenas",
-        "created_at": "2019-10-09T17:50:54.544053Z"
-    },
-    {
-        "id": 2,
-        "content": "hey, que tal",
-        "created_at": "2019-10-09T22:19:38.395935Z"
-    },
-    {
-        "id": 3,
-        "content": "Antonio",
-        "created_at": "2019-10-10T17:43:14.854128Z"
-    },
-    {
-        "id": 4,
-        "content": "Antonio",
-        "created_at": "2019-10-10T17:43:47.348349Z"
-    },
-    {
-        "id": 5,
-        "content": "Antonio",
-        "created_at": "2019-10-10T17:44:15.047570Z"
-    }
-]
+
+{
+    "count": 2,
+    "next": null,
+    "previous": null,
+    "results": [
+        {
+            "id": 1,
+            "content": "hola, buenas",
+            "created_at": "2019-10-09T17:50:54.544053Z",
+            "user": {
+                "id": 1,
+                "username": "pepe",
+                "email": "pepe@gmail.com",
+                "profile": {
+                    "first_name": "pepe",
+                    "last_name": "manuel"
+                }
+            }
+        },
+        {
+            "id": 2,
+            "content": "hey, que tal",
+            "created_at": "2019-10-09T22:19:38.395935Z",
+            "user": {
+                "id": 1,
+                "username": "pepe",
+                "email": "pepe@gmail.com",
+                "profile": {
+                    "first_name": "pepe",
+                    "last_name": "manuel"
+                }
+            }
+        }
+    ]
+}
 ```
+```
+GET /api/posts/me/?limit=1
+Host: localhost:8000
+Content-Type: application/json
+Authorization: Bearer <access token>
+```
+Response
+```
+HTTP 200 OK
+Content-Type: application/json
+{
+    "count": 2,
+    "next": "http://localhost:8000/api/posts/?limit=1&offset=1",
+    "previous": null,
+    "results": [
+        {
+            "id": 1,
+            "content": "content",
+            "created_at": "2019-10-11T15:05:05.973332Z",
+            "user": {
+                "id": 2,
+                "username": "user",
+                "email": "user@mail.com",
+                "profile": {
+                    "first_name": "user",
+                    "last_name": "user"
+                }
+            }
+        }
+    ]
+}
+```
+
 ```
 HTTP 401 Unauthorized
 Content-Type: application/json
