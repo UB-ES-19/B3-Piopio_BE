@@ -76,8 +76,7 @@ class PostSerializer(serializers.ModelSerializer):
         model = Post
 
     def create(self, validated_data):
-        user_id = validated_data.pop('user_id')
-        return Post.objects.create(user_id=user_id, **validated_data)
+        return Post.objects.create(**validated_data)
 
     def update(self, instance, validated_data):
         instance.content = validated_data.get("content")
@@ -85,7 +84,7 @@ class PostSerializer(serializers.ModelSerializer):
         return instance
 
 
-class PostSerializerWithUser(PostSerializer):
+class PostSerializerWithUser(serializers.ModelSerializer):
     user = UserDefaultSerializer(read_only=True)
 
     class Meta:

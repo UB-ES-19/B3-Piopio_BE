@@ -63,7 +63,7 @@ class PostsFromUserView(viewsets.ReadOnlyModelViewSet):
 
 
 class PostView(viewsets.ModelViewSet):
-    queryset = models.Post.objects.all().order_by('created_at')
+    queryset = models.Post.objects.all().order_by('-created_at')
     serializer_class = serializers.PostSerializerWithUser
     permission_classes = (permissions.PermissionMapper,)
     has_permissions = {
@@ -104,6 +104,7 @@ class PostView(viewsets.ModelViewSet):
         Returns the list of the authenticated user's posts.
         """
         user = request.user
-        posts = self.get_queryset().filter(user_id=user.pk).values()
-        serialized_posts = serializers.PostSerializer(posts, many=True)
-        return Response(serialized_posts.data)
+        posts = self.get_queryset().filter(user_id=user.pk)
+        page = self.paginate_queryset(posts)
+        serialized_posts = serializers.PostSerializerWithUser(page, many=True)
+        return self.get_paginated_response(serialized_posts.data)
