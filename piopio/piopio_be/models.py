@@ -5,7 +5,7 @@ from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from piopio_be.managers import PiopioUserManager
 
 
-USERNAME_REGEX = '^[a-zA-Z0-9.-_]*$'
+USERNAME_REGEX = '^[a-zA-Z0-9-_]*$'
 
 
 class User(AbstractBaseUser, PermissionsMixin):
@@ -14,7 +14,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         validators=[
             RegexValidator(
                 regex=USERNAME_REGEX,
-                message='Username must be alphanumeric or contain any of the following: ". _ -" ',
+                message='Username must be alphanumeric or contain any of the following: "_ -" ',
                 code='invalid_username'
             )],
         unique=True,
@@ -40,3 +40,16 @@ class Profile(models.Model):
 
     def __str__(self):
         return str(self.first_name) + " " + str(self.last_name)
+
+
+class Post(models.Model):
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.content
+
+    class Meta:
+        ordering = ('created_at',)
+

@@ -1,10 +1,9 @@
 # API serializers
+from drf_writable_nested import WritableNestedModelSerializer
 from rest_framework import serializers, exceptions
-from piopio_be import messages
-from piopio_be.models import User, Profile
+from piopio_be.models import User, Profile,Post
 from django.contrib.auth.password_validation import validate_password
 from django.core import exceptions
-from django.db import IntegrityError, transaction
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
@@ -17,6 +16,20 @@ class UserProfileSerializer(serializers.ModelSerializer):
         fields = [
             'first_name',
             'last_name'
+        ]
+
+
+class UserDefaultSerializer(WritableNestedModelSerializer):
+
+    profile = UserProfileSerializer(required=True)
+
+    class Meta:
+        model = User
+        fields = [
+            "id",
+            "username",
+            "email",
+            "profile",
         ]
 
 
@@ -56,13 +69,24 @@ class UserCreateSerializer(serializers.ModelSerializer):
         return user
 
 
-class UserSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(style={"input_type": "password"}, write_only=True)
+class PostSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = User
-        fields = (
-            User.USERNAME_FIELD,
-            "email",
-            'password'
-        )
+        fields = ('id', 'content', 'created_at')
+        model = Post
+
+    def create(self, validated_data):
+        return Post.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        instance.content = validated_data.get("content")
+        instance.save()
+        return instance
+
+
+class PostSerializerWithUser(serializers.ModelSerializer):
+    user = UserDefaultSerializer(read_only=True)
+
+    class Meta:
+        fields = ('id', 'content', 'created_at', 'user')
+        model = Post
