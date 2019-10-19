@@ -128,6 +128,29 @@ Content-Type: application/json
 }
 ```
 
+#### Get info from authenticated user
+```
+GET /api/users/me/
+Host: localhost:8000
+Content-Type: application/json
+Authorization: Bearer <access token>
+```
+Response
+```
+Status: 200 OK
+Content-Type: application/json
+
+{
+    "id": 2,
+    "username": "test",
+    "email": "test@test.com",
+    "profile": {
+        "first_name": "test",
+        "last_name": "test"
+    }
+}
+```
+
 #### Create User:
 
 ```
