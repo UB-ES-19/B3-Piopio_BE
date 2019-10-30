@@ -43,6 +43,18 @@ class UserView(viewsets.ModelViewSet):
         s = self.get_serializer(q)
         return Response(s.data)
 
+    @action(methods=['GET'], detail=False, url_path="search", url_name="user_search")
+    def search(self, request):
+        try:
+            username = request.query_params.get('username')
+            users_queryset = self.queryset.filter(username__icontains=username)
+        except ValueError:
+            return Response({'username': 'Not specified'}, status.HTTP_404_NOT_FOUND)
+
+        page = self.paginate_queryset(users_queryset)
+        serialized_users = serializers.UserDefaultSerializer(page, many=True)
+        return self.get_paginated_response(serialized_users.data)
+
 
 class PostsFromUserView(viewsets.ReadOnlyModelViewSet):
     """
