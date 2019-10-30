@@ -231,6 +231,34 @@ Content-Type: application/json
 }
 ```
 
+#### Get a list of users by substring
+```
+GET /api/users/search/?username=pepe
+Host: localhost:8000
+Content-Type: application/json
+Accept: application/json
+```
+Response
+```
+{
+    "count": 1,
+    "next": null,
+    "previous": null,
+    "results": [
+        {
+            "id": 1,
+            "username": "pepe",
+            "email": "pepe@gmail.com",
+            "profile": {
+                "first_name": "pepe",
+                "last_name": "manuel"
+            }
+        }
+    ]
+}
+```
+
+# Posts
 #### Get All Posts (with pagination):
 
 ```
