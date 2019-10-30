@@ -90,3 +90,20 @@ class PostSerializerWithUser(serializers.ModelSerializer):
     class Meta:
         fields = ('id', 'content', 'created_at', 'user')
         model = Post
+
+
+
+class EachUserSerializer(serializers.ModelSerializer):
+    #username = serializers.CharField(source='user')
+
+    class Meta:
+        fields = ('username',)
+        model = User
+
+class FollowerSerializer(serializers.ModelSerializer):
+    followers = EachUserSerializer(many=True, read_only= True)
+    followings = EachUserSerializer(many=True,read_only=True)
+
+    class Meta:
+        model = User
+        fields = ('followers','followings','username')

@@ -120,3 +120,46 @@ class PostView(viewsets.ModelViewSet):
         page = self.paginate_queryset(posts)
         serialized_posts = serializers.PostSerializerWithUser(page, many=True)
         return self.get_paginated_response(serialized_posts.data)
+
+
+class UserProfileView(viewsets.ModelViewSet):
+    queryset = models.User.objects.all()
+    serializer_class = serializers.FollowerSerializer
+
+    def list(self, request, user_pk=None):
+        if(user_pk==None):
+            queryset = models.User.objects.all()
+        else:
+            queryset = self.queryset.filter( username = user_pk)
+        serializer = self.serializer_class(queryset, many=True)
+        return Response(serializer.data)
+
+
+#Need to change and fix it
+    @action(detail=True,
+        methods=['post'])
+    def follow_user(self, request,pk):
+        me = queryset.get(pk)
+        print(me)
+        if not self.followings.all().filter(username=pk).exists():
+            self.followings.add(other)
+            self.save()
+            other.followers.add(self)
+            other.save()
+            return True
+        else:
+            return False
+
+    @action(detail=True, methods=['post'])
+    def unfollow_user(self, username):
+        other = User.objects.get(id=username)
+        if self.is_following(username):
+            self.followings.remove(other)
+            self.save()
+            other.followers.remove(self)
+            other.save()
+            return True
+        else:
+            return False
+
+
