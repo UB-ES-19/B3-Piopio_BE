@@ -55,6 +55,23 @@ class UserView(viewsets.ModelViewSet):
         serialized_users = serializers.UserDefaultSerializer(page, many=True)
         return self.get_paginated_response(serialized_users.data)
 
+    @action(methods=['GET'], detail=True, url_path="follow", url_name="user_follow")
+    def get_followers(self,request):
+        username = request.query_params.get('username', None)
+        if username is not None:
+            if self.queryset.filter(username=username).exists():
+                print("Asdasdasda")
+                wanted = models.User.objects.get(username=username)
+                followers = wanted.followers.all()
+                serializer = serializers.FollowerSerializer(followers)
+                return JsonResponse(serializer.data)
+            else:
+                return JsonResponse({"result": "user_does_not_exist"})
+        else:
+            #TODO: return current user's followers
+            return JsonResponse({"result": "provide_username"})
+
+
 
 class PostsFromUserView(viewsets.ReadOnlyModelViewSet):
     """
@@ -133,33 +150,5 @@ class UserProfileView(viewsets.ModelViewSet):
             queryset = self.queryset.filter( username = user_pk)
         serializer = self.serializer_class(queryset, many=True)
         return Response(serializer.data)
-
-
-#Need to change and fix it
-    @action(detail=True,
-        methods=['post'])
-    def follow_user(self, request,pk):
-        me = queryset.get(pk)
-        print(me)
-        if not self.followings.all().filter(username=pk).exists():
-            self.followings.add(other)
-            self.save()
-            other.followers.add(self)
-            other.save()
-            return True
-        else:
-            return False
-
-    @action(detail=True, methods=['post'])
-    def unfollow_user(self, username):
-        other = User.objects.get(id=username)
-        if self.is_following(username):
-            self.followings.remove(other)
-            self.save()
-            other.followers.remove(self)
-            other.save()
-            return True
-        else:
-            return False
 
 
