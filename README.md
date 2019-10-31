@@ -72,34 +72,53 @@ Response
 HTTP 200 OK
 Content-Type: application/json
 
-[
-    {
-        "followers": [
-            {
-                "username": "onebu"
-            }
-        ],
-        "followings": [
-            {
-                "username": "onebu"
-            }
-        ],
-        "username": "7ke"
-    },
-    {
-        "followers": [
-            {
-                "username": "7ke"
-            }
-        ],
-        "followings": [
-            {
-                "username": "7ke"
-            }
-        ],
-        "username": "onebu"
-    }
-]
+{
+    "count": 5,
+    "next": null,
+    "previous": null,
+    "results": [
+        {
+            "followers": [],
+            "followings": [
+                {
+                    "id": 5,
+                    "username": "sutikcram"
+                }
+            ],
+            "id": 1,
+            "username": "pepe"
+        },
+        {
+            "followers": [],
+            "followings": [],
+            "id": 2,
+            "username": "antonio"
+        },
+        {
+            "followers": [],
+            "followings": [],
+            "id": 3,
+            "username": "antonio2"
+        },
+        {
+            "followers": [],
+            "followings": [],
+            "id": 4,
+            "username": "qwerqwer"
+        },
+        {
+            "followers": [
+                {
+                    "id": 1,
+                    "username": "pepe"
+                }
+            ],
+            "followings": [],
+            "id": 5,
+            "username": "sutikcram"
+        }
+    ]
+}
 ```
 
 #### List all Followers&Followings by id:
@@ -114,39 +133,91 @@ Response
 HTTP 200 OK
 Content-Type: application/json
 
-[
-    {
-        "followers": [
-            {
-                "username": "onebu"
-            }
-        ],
-        "followings": [
-            {
-                "username": "onebu"
-            }
-        ],
-        "username": "7ke"
-    }
+{
+    "followers": [],
+    "followings": [
+        {
+            "id": 5,
+            "username": "sutikcram",
+            "email": "sutikcram@gmail.com",
+            "profile": {
+                "first_name": "marc",
+                "last_name": "urgeello"
+            },
+            "followings": [],
+            "followers": [
+                1
+            ],
+            "following_count": 0,
+            "follower_count": 1
+        }
+    ],
+    "id": 1,
+    "username": "pepe"
+}
 ```
 
 #### Follow another user:
 ```
-GET /api/users/follow/?username={username_to_follow}
+POST /api/users/follow/
 Host: localhost:8000
 Content-Type: application/json
 Accept: application/json
+Authorization: Bearer <access token>
+
+{
+    "username":"pepe"
+}
+```
+
+Response
+```
+HTTP 200 OK
+Content-Type: application/json
+
+{
+    "username": "Correct"
+}
+```
+
+```
+HTTP 404 Not Found
+Content-Type: application/json
+
+{
+    "username": "The specified user does not exist"
+}
 ```
 
 #### Unfollow another user:
 ```
-GET /api/users/unfollow/?username={username_to_follow}
+POST /api/users/unfollow/
 Host: localhost:8000
 Content-Type: application/json
 Accept: application/json
+
+{
+    "username":"pepe"
+}
+```
+Response
+```
+HTTP 200 OK
+Content-Type: application/json
+
+{
+    "username": "Correct"
+}
 ```
 
+```
+HTTP 404 Not Found
+Content-Type: application/json
 
+{
+    "username": "The specified user does not exist"
+}
+```
 ## Users
 #### List Users:
 ```
