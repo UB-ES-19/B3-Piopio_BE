@@ -60,6 +60,92 @@ Content-Type: application/json
     "access": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNTcwMjc5OTA4LCJqdGkiOiIxYTEwNDRkM2E0YjY0YmI0OGJhYzE4Y2RmYmJmMWRiMSIsInVzZXJfaWQiOjF9.Rdt8lJdEFdz-4-rN-ziPYj2L58pdYlAWh6YevluGM94"
 }
 ```
+## Follows
+#### List all Followers&Followings:
+```
+GET /api/follows/
+Host: localhost:8000
+Content-Type: application/json
+```
+Response
+```
+HTTP 200 OK
+Content-Type: application/json
+
+[
+    {
+        "followers": [
+            {
+                "username": "onebu"
+            }
+        ],
+        "followings": [
+            {
+                "username": "onebu"
+            }
+        ],
+        "username": "7ke"
+    },
+    {
+        "followers": [
+            {
+                "username": "7ke"
+            }
+        ],
+        "followings": [
+            {
+                "username": "7ke"
+            }
+        ],
+        "username": "onebu"
+    }
+]
+```
+
+#### List all Followers&Followings by id:
+
+```
+GET /api/follows/{user_id}
+Host: localhost:8000
+Content-Type: application/json
+```
+Response
+```
+HTTP 200 OK
+Content-Type: application/json
+
+[
+    {
+        "followers": [
+            {
+                "username": "onebu"
+            }
+        ],
+        "followings": [
+            {
+                "username": "onebu"
+            }
+        ],
+        "username": "7ke"
+    }
+```
+
+#### Follow another user:
+```
+GET /api/users/follow/?username={username_to_follow}
+Host: localhost:8000
+Content-Type: application/json
+Accept: application/json
+```
+
+#### Unfollow another user:
+```
+GET /api/users/unfollow/?username={username_to_follow}
+Host: localhost:8000
+Content-Type: application/json
+Accept: application/json
+```
+
 
 ## Users
 #### List Users:
