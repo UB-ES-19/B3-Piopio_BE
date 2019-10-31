@@ -94,7 +94,7 @@ class PostSerializerWithUser(serializers.ModelSerializer):
         model = Post
 
 
-
+#Serializers to show nested manytomany relations
 class EachUserSerializer(serializers.ModelSerializer):
     #username = serializers.CharField(source='user')
 

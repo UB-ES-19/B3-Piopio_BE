@@ -164,6 +164,9 @@ class PostView(viewsets.ModelViewSet):
 
 
 class UserProfileView(viewsets.ModelViewSet):
+    """
+       Viewset to return all the nested friendship relations.
+    """
     queryset = models.User.objects.all()
     serializer_class = serializers.FollowerSerializer
 
