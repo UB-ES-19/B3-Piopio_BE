@@ -91,3 +91,4 @@ local_settings.py
 .env
 db.sqlite3
 piopio/piopio/settings.py
+piopio/piopio/settings.py

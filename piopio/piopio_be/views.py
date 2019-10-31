@@ -55,22 +55,46 @@ class UserView(viewsets.ModelViewSet):
         serialized_users = serializers.UserDefaultSerializer(page, many=True)
         return self.get_paginated_response(serialized_users.data)
 
-    @action(methods=['GET'], detail=True, url_path="follow", url_name="user_follow")
-    def get_followers(self,request):
-        username = request.query_params.get('username', None)
-        if username is not None:
-            if self.queryset.filter(username=username).exists():
-                print("Asdasdasda")
-                wanted = models.User.objects.get(username=username)
-                followers = wanted.followers.all()
-                serializer = serializers.FollowerSerializer(followers)
-                return JsonResponse(serializer.data)
-            else:
-                return JsonResponse({"result": "user_does_not_exist"})
-        else:
-            #TODO: return current user's followers
-            return JsonResponse({"result": "provide_username"})
+    @action(methods=['POST'], detail=False, url_path="follow", url_name="user_follow")
+    def follow(self,request):
+        try:
+            username = request.query_params.get('username')
+            other = self.queryset.get(username=username)
+            q = self.queryset.filter(pk=request.user.pk).first()
+            s = self.get_serializer(q)
+            print(q)
+            if not q.followings.all().filter(username=username).exists():
+                q.followings.add(other)
+                q.following_count = q.followings.all().count()
+                q.save()
+                other.followers.add(q)
+                other.follower_count = other.followers.all().count()
+                other.save()
 
+            return Response({'username': username}, status.HTTP_201_CREATED)
+        except ValueError:
+            return Response({'username': 'Not specified'}, status.HTTP_404_NOT_FOUND)
+
+
+    @action(methods=['POST'], detail=False, url_path="unfollow", url_name="user_unfollow")
+    def unfollow(self,request):
+        try:
+            username = request.query_params.get('username')
+            other = self.queryset.get(username=username)
+            q = self.queryset.filter(pk=request.user.pk).first()
+            s = self.get_serializer(q)
+            print(q)
+            if q.followings.all().filter(username=username).exists():
+                q.followings.remove(other)
+                q.following_count = q.followings.all().count()
+                q.save()
+                other.followers.remove(q)
+                other.follower_count = other.followers.all().count()
+                other.save()
+                
+            return Response({'username': username}, status.HTTP_201_CREATED)
+        except ValueError:
+            return Response({'username': 'Not specified'}, status.HTTP_404_NOT_FOUND)
 
 
 class PostsFromUserView(viewsets.ReadOnlyModelViewSet):

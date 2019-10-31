@@ -31,39 +31,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     REQUIRED_FIELDS = ['email', 'password']
     USERNAME_FIELD = 'username'
 
-    def follow_user(self, username):
-        other = UserProfile.objects.get(user__username=username)
-        if not self.is_following(username):
-            self.followings.add(other)
-            self.following_count = self.followings.all().count()
-            self.save()
-            other.followers.add(self)
-            other.follower_count = other.followers.all().count()
-            other.save()
-            return True
-        else:
-            return False
-
-
-    def unfollow_user(self, username):
-            other = UserProfile.objects.get(user__username=username)
-            if self.is_following(username):
-                self.followings.remove(other)
-                self.following_count = self.followings.all().count()
-                self.save()
-                other.followers.remove(self)
-                other.follower_count = other.followers.all().count()
-                other.save()
-                return True
-            else:
-                return False
-
-    def is_following(self, username):  #returns Bool
-        return self.followings.all().filter(username=username).exists()
-
-    def is_followed_by(self, username):  #returns Bool
-        return self.followers.all().filter(username=username).exists()
-
 
     objects = PiopioUserManager()
 
