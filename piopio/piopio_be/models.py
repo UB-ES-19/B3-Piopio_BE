@@ -51,6 +51,7 @@ class Post(models.Model):
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    type = models.CharField(max_length=10)
 
     def __str__(self):
         return self.content
@@ -58,3 +59,14 @@ class Post(models.Model):
     class Meta:
         ordering = ('created_at',)
 
+
+class Media(models.Model):
+    url = models.CharField(max_length=200)
+    created_at = models.DateTimeField(auto_now_add=True)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.url
+
+    class Meta:
+        ordering = ('created_at',)
