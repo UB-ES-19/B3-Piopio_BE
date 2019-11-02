@@ -23,9 +23,14 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     date_joined = models.DateTimeField(default=timezone.now, verbose_name='date joined')
+    followings = models.ManyToManyField('self', related_name='following', symmetrical=False)
+    followers = models.ManyToManyField('self', related_name='follower', symmetrical=False)
+    following_count = models.IntegerField(default=0)
+    follower_count = models.IntegerField(default=0)
 
     REQUIRED_FIELDS = ['email', 'password']
     USERNAME_FIELD = 'username'
+
 
     objects = PiopioUserManager()
 
