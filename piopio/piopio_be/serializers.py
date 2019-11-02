@@ -30,6 +30,10 @@ class UserDefaultSerializer(WritableNestedModelSerializer):
             "username",
             "email",
             "profile",
+            "followings",
+            "followers",
+            "following_count",
+            "follower_count"
         ]
 
 
@@ -90,3 +94,26 @@ class PostSerializerWithUser(serializers.ModelSerializer):
     class Meta:
         fields = ('id', 'content', 'created_at', 'user')
         model = Post
+
+#Serializers to show nested manytomany relations
+class EachUserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        fields = ('id', 'username')
+        model = User
+
+class FollowerSerializer(serializers.ModelSerializer):
+    followers = EachUserSerializer(many=True, read_only= True)
+    followings = EachUserSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = User
+        fields = ('followers','followings','id','username')
+
+class FollowerDetailSerializer(serializers.ModelSerializer):
+    followers = UserDefaultSerializer(many=True, read_only= True)
+    followings = UserDefaultSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = User
+        fields = ('followers','followings','id','username')

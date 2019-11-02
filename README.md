@@ -60,7 +60,164 @@ Content-Type: application/json
     "access": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNTcwMjc5OTA4LCJqdGkiOiIxYTEwNDRkM2E0YjY0YmI0OGJhYzE4Y2RmYmJmMWRiMSIsInVzZXJfaWQiOjF9.Rdt8lJdEFdz-4-rN-ziPYj2L58pdYlAWh6YevluGM94"
 }
 ```
+## Follows
+#### List all Followers&Followings:
+```
+GET /api/follows/
+Host: localhost:8000
+Content-Type: application/json
+```
+Response
+```
+HTTP 200 OK
+Content-Type: application/json
 
+{
+    "count": 5,
+    "next": null,
+    "previous": null,
+    "results": [
+        {
+            "followers": [],
+            "followings": [
+                {
+                    "id": 5,
+                    "username": "sutikcram"
+                }
+            ],
+            "id": 1,
+            "username": "pepe"
+        },
+        {
+            "followers": [],
+            "followings": [],
+            "id": 2,
+            "username": "antonio"
+        },
+        {
+            "followers": [],
+            "followings": [],
+            "id": 3,
+            "username": "antonio2"
+        },
+        {
+            "followers": [],
+            "followings": [],
+            "id": 4,
+            "username": "qwerqwer"
+        },
+        {
+            "followers": [
+                {
+                    "id": 1,
+                    "username": "pepe"
+                }
+            ],
+            "followings": [],
+            "id": 5,
+            "username": "sutikcram"
+        }
+    ]
+}
+```
+
+#### List all Followers&Followings by id:
+
+```
+GET /api/follows/{user_id}
+Host: localhost:8000
+Content-Type: application/json
+```
+Response
+```
+HTTP 200 OK
+Content-Type: application/json
+
+{
+    "followers": [],
+    "followings": [
+        {
+            "id": 5,
+            "username": "sutikcram",
+            "email": "sutikcram@gmail.com",
+            "profile": {
+                "first_name": "marc",
+                "last_name": "urgeello"
+            },
+            "followings": [],
+            "followers": [
+                1
+            ],
+            "following_count": 0,
+            "follower_count": 1
+        }
+    ],
+    "id": 1,
+    "username": "pepe"
+}
+```
+
+#### Follow another user:
+```
+POST /api/users/follow/
+Host: localhost:8000
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer <access token>
+
+{
+    "username":"pepe"
+}
+```
+
+Response
+```
+HTTP 200 OK
+Content-Type: application/json
+
+{
+    "username": "Correct"
+}
+```
+
+```
+HTTP 404 Not Found
+Content-Type: application/json
+
+{
+    "username": "The specified user does not exist"
+}
+```
+
+#### Unfollow another user:
+```
+POST /api/users/unfollow/
+Host: localhost:8000
+Content-Type: application/json
+Accept: application/json
+
+{
+    "username":"pepe"
+}
+```
+Response
+```
+HTTP 200 OK
+Content-Type: application/json
+
+{
+    "username": "Correct"
+}
+```
+
+```
+HTTP 404 Not Found
+Content-Type: application/json
+
+{
+    "username": "The specified user does not exist"
+}
+```
 ## Users
 #### List Users:
 ```
@@ -231,6 +388,34 @@ Content-Type: application/json
 }
 ```
 
+#### Get a list of users by substring
+```
+GET /api/users/search/?username=pepe
+Host: localhost:8000
+Content-Type: application/json
+Accept: application/json
+```
+Response
+```
+{
+    "count": 1,
+    "next": null,
+    "previous": null,
+    "results": [
+        {
+            "id": 1,
+            "username": "pepe",
+            "email": "pepe@gmail.com",
+            "profile": {
+                "first_name": "pepe",
+                "last_name": "manuel"
+            }
+        }
+    ]
+}
+```
+
+# Posts
 #### Get All Posts (with pagination):
 
 ```
