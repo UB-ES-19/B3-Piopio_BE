@@ -511,6 +511,12 @@ Content-Type: application/json
 {
     "id": 2,
     "content": "content",
+    "type": "<text, image or video>",
+    "media": [
+        {
+            "url": "http://..."
+        }
+    ],
     "created_at": "2019-10-07T18:42:09.566717Z",
     "user": {
         "id": 2,
@@ -541,6 +547,12 @@ Authorization: Bearer <access token>
 
 {
     "content": "<content>"
+    "type": "<text, image or video>",
+    "media" : [
+    	{
+    		"url": "http://..."
+    	}
+    ]
 }
 ```
 Response
@@ -551,6 +563,12 @@ Content-Type: application/json
 {
     "id": 3,
     "content": "<content>",
+    "type": "<text, image or video>",
+    "media": [
+        {
+            "url": "http://..."
+        }
+    ],
     "created_at": "2019-10-11T15:23:34.257337Z",
     "user": {
         "id": 2,

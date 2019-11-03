@@ -136,12 +136,12 @@ class PostView(viewsets.ModelViewSet):
     }
 
     def get_serializer_class(self):
-        if self.action == 'create':
+        if self.action == 'create' or self.action == 'update':
             return serializers.PostSerializer
         return serializers.PostSerializerWithUser
 
     def create(self, request, *args, **kwargs):
-        serializer = self.serializer_class(data=request.data)
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save(user_id=request.user.pk)
         headers = self.get_success_headers(serializer.data)
