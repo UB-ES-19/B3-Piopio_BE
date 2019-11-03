@@ -5,6 +5,7 @@ from rest_framework.decorators import api_view
 
 from piopio_be import serializers, models, permissions
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from django.core.paginator import Paginator
 
 # Create your views here.
 
@@ -171,7 +172,7 @@ class PostView(viewsets.ModelViewSet):
         return self.get_paginated_response(serialized_posts.data)
 
 
-class UserProfileView(viewsets.GenericViewSet,
+class UserFollowerView(viewsets.GenericViewSet,
                       mixins.RetrieveModelMixin,
                       mixins.ListModelMixin):
     """
@@ -187,3 +188,17 @@ class UserProfileView(viewsets.GenericViewSet,
             return serializers.FollowerDetailSerializer
 
 
+class UserFollwoingView(viewsets.GenericViewSet,
+                      mixins.RetrieveModelMixin,
+                      mixins.ListModelMixin):
+    """
+       Viewset to return all the nested friendship relations.
+    """
+    queryset = models.User.objects.all()
+    serializer_class = serializers.FollowingSerializer
+
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return serializers.FollowingSerializer
+        else: # retrieve
+            return serializers.FollowingDetailSerializer
