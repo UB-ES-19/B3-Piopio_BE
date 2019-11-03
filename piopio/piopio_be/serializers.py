@@ -97,7 +97,7 @@ class PostSerializerWithUser(serializers.ModelSerializer):
     media = MediaSerializer(read_only=True, source="media_set", many=True)
 
     class Meta:
-        fields = ('id', 'content', 'media', 'user', 'created_at', )
+        fields = ('id', 'content', 'type', 'media', 'user', 'created_at', )
         model = Post
 
 
