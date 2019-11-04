@@ -185,7 +185,14 @@ class UserFollowerView(viewsets.GenericViewSet,
         if self.action == 'list':
             return serializers.FollowerSerializer
         else: # retrieve
-            return serializers.FollowerDetailSerializer
+            return serializers.UserDefaultSerializer
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        followers = instance.followers.all()
+        page = self.paginate_queryset(followers)
+        serialized_followers = self.get_serializer(page, many=True)
+        return self.get_paginated_response(serialized_followers.data)
 
 
 class UserFollwoingView(viewsets.GenericViewSet,
@@ -201,4 +208,11 @@ class UserFollwoingView(viewsets.GenericViewSet,
         if self.action == 'list':
             return serializers.FollowingSerializer
         else: # retrieve
-            return serializers.FollowingDetailSerializer
+            return serializers.UserDefaultSerializer
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        followings = instance.followings.all()
+        page = self.paginate_queryset(followings)
+        serialized_followings = self.get_serializer(page, many=True)
+        return self.get_paginated_response(serialized_followings.data)
