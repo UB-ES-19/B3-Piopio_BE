@@ -61,7 +61,7 @@ Content-Type: application/json
 }
 ```
 ## Follows
-#### List all Followers&Followings:
+#### List all Followers:
 ```
 GET /api/follows/
 Host: localhost:8000
@@ -78,8 +78,7 @@ Content-Type: application/json
     "previous": null,
     "results": [
         {
-            "followers": [],
-            "followings": [
+            "followers": [
                 {
                     "id": 5,
                     "username": "sutikcram"
@@ -90,30 +89,21 @@ Content-Type: application/json
         },
         {
             "followers": [],
-            "followings": [],
             "id": 2,
             "username": "antonio"
         },
         {
             "followers": [],
-            "followings": [],
             "id": 3,
             "username": "antonio2"
         },
         {
             "followers": [],
-            "followings": [],
             "id": 4,
             "username": "qwerqwer"
         },
         {
-            "followers": [
-                {
-                    "id": 1,
-                    "username": "pepe"
-                }
-            ],
-            "followings": [],
+            "followers": [],
             "id": 5,
             "username": "sutikcram"
         }
@@ -121,7 +111,7 @@ Content-Type: application/json
 }
 ```
 
-#### List all Followers&Followings by id:
+#### List all Followers by id:
 
 ```
 GET /api/follows/{user_id}
@@ -134,8 +124,10 @@ HTTP 200 OK
 Content-Type: application/json
 
 {
-    "followers": [],
-    "followings": [
+    "count": 1,
+    "next": null,
+    "previous": null,
+    "results": [
         {
             "id": 5,
             "username": "sutikcram",
@@ -144,18 +136,94 @@ Content-Type: application/json
                 "first_name": "marc",
                 "last_name": "urgeello"
             },
-            "followings": [],
-            "followers": [
-                1
-            ],
             "following_count": 0,
             "follower_count": 1
         }
-    ],
-    "id": 1,
-    "username": "pepe"
+    ]
 }
 ```
+
+#### List all Followings:
+```
+GET /api/follows/
+Host: localhost:8000
+Content-Type: application/json
+```
+Response
+```
+HTTP 200 OK
+Content-Type: application/json
+
+{
+    "count": 5,
+    "next": null,
+    "previous": null,
+    "results": [
+        {
+            "followings": [
+                {
+                    "id": 5,
+                    "username": "sutikcram"
+                }
+            ],
+            "id": 1,
+            "username": "pepe"
+        },
+        {
+            "followings": [],
+            "id": 2,
+            "username": "antonio"
+        },
+        {
+            "followings": [],
+            "id": 3,
+            "username": "antonio2"
+        },
+        {
+            "followings": [],
+            "id": 4,
+            "username": "qwerqwer"
+        },
+        {
+            "followings": [],
+            "id": 5,
+            "username": "sutikcram"
+        }
+    ]
+}
+```
+
+#### List all Followings by id:
+```
+GET /api/followings/{user_id}
+Host: localhost:8000
+Content-Type: application/json
+```
+Response
+```
+HTTP 200 OK
+Content-Type: application/json
+
+{
+    "count": 1,
+    "next": null,
+    "previous": null,
+    "results": [
+        {
+            "id": 5,
+            "username": "sutikcram",
+            "email": "sutikcram@gmail.com",
+            "profile": {
+                "first_name": "marc",
+                "last_name": "urgeello"
+            },
+            "following_count": 0,
+            "follower_count": 1
+        }
+    ]
+}
+```
+
 
 #### Follow another user:
 ```

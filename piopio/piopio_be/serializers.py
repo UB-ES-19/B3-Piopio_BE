@@ -30,8 +30,6 @@ class UserDefaultSerializer(WritableNestedModelSerializer):
             "username",
             "email",
             "profile",
-            "followings",
-            "followers",
             "following_count",
             "follower_count"
         ]
@@ -111,17 +109,33 @@ class EachUserSerializer(serializers.ModelSerializer):
 
 class FollowerSerializer(serializers.ModelSerializer):
     followers = EachUserSerializer(many=True, read_only= True)
+    #followings = EachUserSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = User
+        fields = ('followers','id','username')
+
+class FollowingSerializer(serializers.ModelSerializer):
     followings = EachUserSerializer(many=True, read_only=True)
 
     class Meta:
         model = User
-        fields = ('followers','followings','id','username')
+        fields = ('followings', 'id', 'username')
+
 
 
 class FollowerDetailSerializer(serializers.ModelSerializer):
-    followers = UserDefaultSerializer(many=True, read_only= True)
-    followings = UserDefaultSerializer(many=True, read_only=True)
+    followers = EachUserSerializer(many=True, read_only= True)
+    #followings = EachUserSerializer(many=True, read_only=True)
 
     class Meta:
         model = User
-        fields = ('followers','followings','id','username')
+        fields = ('followers','id','username')
+
+class FollowingDetailSerializer(serializers.ModelSerializer):
+    #followers = EachUserSerializer(many=True, read_only= True)
+    followings = EachUserSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = User
+        fields = ('followings','id','username')

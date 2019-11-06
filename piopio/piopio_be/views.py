@@ -5,6 +5,7 @@ from rest_framework.decorators import api_view
 
 from piopio_be import serializers, models, permissions
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from django.core.paginator import Paginator
 
 # Create your views here.
 
@@ -171,7 +172,7 @@ class PostView(viewsets.ModelViewSet):
         return self.get_paginated_response(serialized_posts.data)
 
 
-class UserProfileView(viewsets.GenericViewSet,
+class UserFollowerView(viewsets.GenericViewSet,
                       mixins.RetrieveModelMixin,
                       mixins.ListModelMixin):
     """
@@ -184,6 +185,34 @@ class UserProfileView(viewsets.GenericViewSet,
         if self.action == 'list':
             return serializers.FollowerSerializer
         else: # retrieve
-            return serializers.FollowerDetailSerializer
+            return serializers.UserDefaultSerializer
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        followers = instance.followers.all()
+        page = self.paginate_queryset(followers)
+        serialized_followers = self.get_serializer(page, many=True)
+        return self.get_paginated_response(serialized_followers.data)
 
 
+class UserFollwoingView(viewsets.GenericViewSet,
+                      mixins.RetrieveModelMixin,
+                      mixins.ListModelMixin):
+    """
+       Viewset to return all the nested friendship relations.
+    """
+    queryset = models.User.objects.all()
+    serializer_class = serializers.FollowingSerializer
+
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return serializers.FollowingSerializer
+        else: # retrieve
+            return serializers.UserDefaultSerializer
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        followings = instance.followings.all()
+        page = self.paginate_queryset(followings)
+        serialized_followings = self.get_serializer(page, many=True)
+        return self.get_paginated_response(serialized_followings.data)
