@@ -12,6 +12,8 @@ from django.conf.urls import include, url
 router = DefaultRouter()
 router.register(r'users', views.UserView, basename='users')
 router.register(r'posts', views.PostView, basename='posts')
+router.register(r'follows', views.UserFollowerView, basename='follower')
+router.register(r'followings', views.UserFollwoingView, basename='following')
 
 users_router = routers.NestedSimpleRouter(router, r'users', lookup='user')
 users_router.register(r'posts', views.PostsFromUserView)

@@ -23,9 +23,14 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     date_joined = models.DateTimeField(default=timezone.now, verbose_name='date joined')
+    followings = models.ManyToManyField('self', related_name='following', symmetrical=False)
+    followers = models.ManyToManyField('self', related_name='follower', symmetrical=False)
+    following_count = models.IntegerField(default=0)
+    follower_count = models.IntegerField(default=0)
 
     REQUIRED_FIELDS = ['email', 'password']
     USERNAME_FIELD = 'username'
+
 
     objects = PiopioUserManager()
 
@@ -46,6 +51,7 @@ class Post(models.Model):
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    type = models.CharField(max_length=10)
 
     def __str__(self):
         return self.content
@@ -53,3 +59,14 @@ class Post(models.Model):
     class Meta:
         ordering = ('created_at',)
 
+
+class Media(models.Model):
+    url = models.CharField(max_length=200)
+    created_at = models.DateTimeField(auto_now_add=True)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.url
+
+    class Meta:
+        ordering = ('created_at',)

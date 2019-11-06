@@ -1,7 +1,7 @@
 # API serializers
 from drf_writable_nested import WritableNestedModelSerializer
 from rest_framework import serializers, exceptions
-from piopio_be.models import User, Profile,Post
+from piopio_be.models import User, Profile, Post, Media
 from django.contrib.auth.password_validation import validate_password
 from django.core import exceptions
 
@@ -30,6 +30,8 @@ class UserDefaultSerializer(WritableNestedModelSerializer):
             "username",
             "email",
             "profile",
+            "following_count",
+            "follower_count"
         ]
 
 
@@ -69,24 +71,71 @@ class UserCreateSerializer(serializers.ModelSerializer):
         return user
 
 
-class PostSerializer(serializers.ModelSerializer):
+class MediaSerializer(serializers.ModelSerializer):
+
+    url = serializers.CharField(required=True)
 
     class Meta:
-        fields = ('id', 'content', 'created_at')
+        fields = ('url',)
+        model = Media
+
+
+class PostSerializer(WritableNestedModelSerializer):
+
+    media = MediaSerializer(required=False, source="media_set", many=True)
+
+    class Meta:
+        fields = ('id', 'content', 'type', 'media', )
+        write_only = ('content', 'type', 'media',)
         model = Post
-
-    def create(self, validated_data):
-        return Post.objects.create(**validated_data)
-
-    def update(self, instance, validated_data):
-        instance.content = validated_data.get("content")
-        instance.save()
-        return instance
 
 
 class PostSerializerWithUser(serializers.ModelSerializer):
     user = UserDefaultSerializer(read_only=True)
+    media = MediaSerializer(read_only=True, source="media_set", many=True)
 
     class Meta:
-        fields = ('id', 'content', 'created_at', 'user')
+        fields = ('id', 'content', 'type', 'media', 'user', 'created_at', )
         model = Post
+
+
+#Serializers to show nested manytomany relations
+class EachUserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        fields = ('id', 'username')
+        model = User
+
+
+class FollowerSerializer(serializers.ModelSerializer):
+    followers = EachUserSerializer(many=True, read_only= True)
+    #followings = EachUserSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = User
+        fields = ('followers','id','username')
+
+class FollowingSerializer(serializers.ModelSerializer):
+    followings = EachUserSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = User
+        fields = ('followings', 'id', 'username')
+
+
+
+class FollowerDetailSerializer(serializers.ModelSerializer):
+    followers = EachUserSerializer(many=True, read_only= True)
+    #followings = EachUserSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = User
+        fields = ('followers','id','username')
+
+class FollowingDetailSerializer(serializers.ModelSerializer):
+    #followers = EachUserSerializer(many=True, read_only= True)
+    followings = EachUserSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = User
+        fields = ('followings','id','username')
