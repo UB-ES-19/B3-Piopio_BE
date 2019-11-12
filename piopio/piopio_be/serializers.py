@@ -31,7 +31,9 @@ class UserDefaultSerializer(WritableNestedModelSerializer):
             "email",
             "profile",
             "following_count",
-            "follower_count"
+            "follower_count",
+            "followers",
+            "following"
         ]
 
 

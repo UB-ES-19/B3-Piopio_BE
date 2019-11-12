@@ -70,7 +70,7 @@ class UserView(viewsets.ModelViewSet):
                     q.save()
 
                     other.followers.add(q)
-                    other.follower_count = other.following_count + 1
+                    other.follower_count = other.follower_count + 1
                     other.save()
                 return Response({'username': "Correct"}, status.HTTP_201_CREATED)
 
@@ -115,8 +115,9 @@ class PostsFromUserView(viewsets.ReadOnlyModelViewSet):
 
     def list(self, request, user_pk=None, *args, **kwargs):
         posts = self.get_queryset().filter(user_id=user_pk).values()
-        serialized_posts = serializers.PostSerializer(posts, many=True)
-        return Response(serialized_posts.data)
+        page = self.paginate_queryset(posts)
+        serialized_posts = serializers.PostSerializerWithUser(page, many=True)
+        return self.get_paginated_response(serialized_posts.data)
 
     def retrieve(self, request, pk=None, user_pk=None, *args, **kwargs):
         posts = self.get_queryset().get(pk=pk)
