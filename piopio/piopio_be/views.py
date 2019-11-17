@@ -114,14 +114,14 @@ class PostsFromUserView(viewsets.ReadOnlyModelViewSet):
     permission_classes = (IsAuthenticated,)
 
     def list(self, request, user_pk=None, *args, **kwargs):
-        posts = self.get_queryset().filter(user_id=user_pk).values()
+        posts = self.get_queryset().filter(user_id=user_pk)
         page = self.paginate_queryset(posts)
         serialized_posts = serializers.PostSerializerWithUser(page, many=True)
         return self.get_paginated_response(serialized_posts.data)
 
     def retrieve(self, request, pk=None, user_pk=None, *args, **kwargs):
         posts = self.get_queryset().get(pk=pk)
-        serialized_posts = serializers.PostSerializer(posts)
+        serialized_posts = serializers.PostSerializerWithUser(posts)
         return Response(serialized_posts.data)
 
 

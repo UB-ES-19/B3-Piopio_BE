@@ -849,33 +849,65 @@ Authorization: Bearer <access token>
 HTTP 200 OK
 Content-Type: application/json
 
-[
-    {
-        "id": 1,
-        "content": "hola, buenas",
-        "created_at": "2019-10-09T17:50:54.544053Z"
-    },
-    {
-        "id": 2,
-        "content": "hey, que tal",
-        "created_at": "2019-10-09T22:19:38.395935Z"
-    },
-    {
-        "id": 3,
-        "content": "Antonio",
-        "created_at": "2019-10-10T17:43:14.854128Z"
-    },
-    {
-        "id": 4,
-        "content": "Antonio",
-        "created_at": "2019-10-10T17:43:47.348349Z"
-    },
-    {
-        "id": 5,
-        "content": "Antonio",
-        "created_at": "2019-10-10T17:44:15.047570Z"
-    }
-]
+{
+    "count": 2,
+    "next": null,
+    "previous": null,
+    "results": [
+        {
+            "id": 1,
+            "content": "hola, buenas",
+            "type": "text",
+            "media": [],
+            "user": {
+                "id": 1,
+                "username": "pepe",
+                "email": "pepe@gmail.com",
+                "profile": {
+                    "first_name": "pepe",
+                    "last_name": "manuel"
+                },
+                "following_count": 1,
+                "follower_count": 3,
+                "followers": [
+                    5,
+                    6
+                ],
+                "following": [
+                    5,
+                    6
+                ]
+            },
+            "created_at": "2019-10-09T17:50:54.544053Z"
+        },
+        {
+            "id": 2,
+            "content": "hey, que tal",
+            "type": "text",
+            "media": [],
+            "user": {
+                "id": 1,
+                "username": "pepe",
+                "email": "pepe@gmail.com",
+                "profile": {
+                    "first_name": "pepe",
+                    "last_name": "manuel"
+                },
+                "following_count": 1,
+                "follower_count": 3,
+                "followers": [
+                    5,
+                    6
+                ],
+                "following": [
+                    5,
+                    6
+                ]
+            },
+            "created_at": "2019-10-09T22:19:38.395935Z"
+        }
+    ]
+}
 ```
 ```
 HTTP 401 Unauthorized
