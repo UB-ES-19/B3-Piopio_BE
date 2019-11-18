@@ -172,6 +172,7 @@ class PostView(viewsets.ModelViewSet):
         serialized_posts = serializers.PostSerializerWithUser(page, many=True)
         return self.get_paginated_response(serialized_posts.data)
 
+
     @action(methods=['GET'], detail=False, permission_classes=(IsAuthenticated,), url_path="(?P<userpk>[^/.]+)/all_related", url_name="all_related_post")
     def related(self, request,userpk):
         """
@@ -187,6 +188,24 @@ class PostView(viewsets.ModelViewSet):
         posts = self.get_queryset().filter(user_id__in=related).order_by('-created_at')
         page = self.paginate_queryset(posts)
         serialized_posts = serializers.PostSerializerWithUser(page, many=True)
+        return self.get_paginated_response(serialized_posts.data)
+
+
+    @action(methods=['GET'], detail=False, url_path="search", url_name="posts_search")
+    def search(self, request):
+        try:
+            content = request.query_params.get('content')
+            contents = content.split(" ")
+            posts_queryset = self.queryset
+
+            for content in contents:
+                posts_queryset = posts_queryset.filter(content__icontains=content)
+
+        except ValueError:
+            return Response({'content': 'Not specified'}, status.HTTP_404_NOT_FOUND)
+
+        page = self.paginate_queryset(posts_queryset)
+        serialized_posts = self.get_serializer(page, many=True)
         return self.get_paginated_response(serialized_posts.data)
 
 
@@ -235,3 +254,34 @@ class UserFollwoingView(viewsets.GenericViewSet,
         page = self.paginate_queryset(followings)
         serialized_followings = self.get_serializer(page, many=True)
         return self.get_paginated_response(serialized_followings.data)
+
+
+class UserNestedFollowerView(viewsets.GenericViewSet,
+                      mixins.ListModelMixin):
+    """
+    Nested view for retrieving and listing the posts of a user
+    """
+    queryset = models.User.objects.all()
+    serializer_class = serializers.UserDefaultSerializer
+
+    def list(self, request, user_pk=None, *args, **kwargs):
+        posts = self.get_queryset().get(pk=user_pk)
+        followers = posts.followers.all()
+        page = self.paginate_queryset(followers)
+        serialized_posts = self.get_serializer(page, many=True)
+        return self.get_paginated_response(serialized_posts.data)
+
+
+class UserNestedFollowingsView(viewsets.ReadOnlyModelViewSet):
+    """
+    Nested view for retrieving and listing the posts of a user
+    """
+    queryset = models.User.objects.all()
+    serializer_class = serializers.UserDefaultSerializer
+
+    def list(self, request, user_pk=None, *args, **kwargs):
+        posts = self.get_queryset().get(pk=user_pk)
+        followings = posts.followers.all()
+        page = self.paginate_queryset(followings)
+        serialized_posts = self.get_serializer(page, many=True)
+        return self.get_paginated_response(serialized_posts.data)

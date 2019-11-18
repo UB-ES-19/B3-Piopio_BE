@@ -286,6 +286,87 @@ Content-Type: application/json
     "username": "The specified user does not exist"
 }
 ```
+
+### List user's followers
+```
+GET /api/users/<user_id>/followers
+Host: localhost:8000
+Content-Type: application/json
+Accept: application/json
+```
+Response
+```
+HTTP 200 OK
+Content-Type: application/json
+
+{
+    "count": 1,
+    "next": null,
+    "previous": null,
+    "results": [
+        {
+            "id": 5,
+            "username": "sutikcram",
+            "email": "sutikcram@gmail.com",
+            "profile": {
+                "first_name": "marc",
+                "last_name": "urgeello"
+            },
+            "following_count": 1,
+            "follower_count": 2,
+            "followers": [
+                1,
+                6
+            ],
+            "following": [
+                1,
+                6
+            ]
+        }
+    ]
+}
+```
+
+### List user's followings
+```
+GET /api/users/<user_id>/followings
+Host: localhost:8000
+Content-Type: application/json
+Accept: application/json
+```
+Response
+```
+HTTP 200 OK
+Content-Type: application/json
+
+{
+    "count": 1,
+    "next": null,
+    "previous": null,
+    "results": [
+        {
+            "id": 5,
+            "username": "sutikcram",
+            "email": "sutikcram@gmail.com",
+            "profile": {
+                "first_name": "marc",
+                "last_name": "urgeello"
+            },
+            "following_count": 1,
+            "follower_count": 2,
+            "followers": [
+                1,
+                6
+            ],
+            "following": [
+                1,
+                6
+            ]
+        }
+    ]
+}
+```
+
 ## Users
 #### List Users:
 ```
