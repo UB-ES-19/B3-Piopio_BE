@@ -172,6 +172,23 @@ class PostView(viewsets.ModelViewSet):
         serialized_posts = serializers.PostSerializerWithUser(page, many=True)
         return self.get_paginated_response(serialized_posts.data)
 
+    @action(methods=['GET'], detail=False, url_path="search", url_name="posts_search")
+    def search(self, request):
+        try:
+            content = request.query_params.get('content')
+            contents = content.split(" ")
+            posts_queryset = self.queryset
+
+            for content in contents:
+                posts_queryset = posts_queryset.filter(content__icontains=content)
+
+        except ValueError:
+            return Response({'content': 'Not specified'}, status.HTTP_404_NOT_FOUND)
+
+        page = self.paginate_queryset(posts_queryset)
+        serialized_posts = self.get_serializer(page, many=True)
+        return self.get_paginated_response(serialized_posts.data)
+
 
 class UserFollowerView(viewsets.GenericViewSet,
                       mixins.RetrieveModelMixin,
