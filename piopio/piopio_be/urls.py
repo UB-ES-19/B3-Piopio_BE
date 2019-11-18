@@ -17,6 +17,8 @@ router.register(r'followings', views.UserFollwoingView, basename='following')
 
 users_router = routers.NestedSimpleRouter(router, r'users', lookup='user')
 users_router.register(r'posts', views.PostsFromUserView)
+users_router.register(r'follows', views.UserNestedFollowerView)
+users_router.register(r'followings', views.UserNestedFollowingsView)
 
 urlpatterns = [
     url(r'^', include(router.urls)),
