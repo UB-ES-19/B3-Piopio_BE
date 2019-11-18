@@ -31,7 +31,9 @@ class UserDefaultSerializer(WritableNestedModelSerializer):
             "email",
             "profile",
             "following_count",
-            "follower_count"
+            "follower_count",
+            "followers",
+            "following"
         ]
 
 
@@ -71,7 +73,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
         return user
 
 
-class MediaSerializer(serializers.ModelSerializer):
+class MediaSerializer(WritableNestedModelSerializer):
 
     url = serializers.CharField(required=True)
 
