@@ -129,11 +129,24 @@ class UserView(viewsets.ModelViewSet):
             print(post.favorited_count)
 
             return Response({'message': "LIKED!"}, status.HTTP_201_CREATED)
-
         except ValueError:
-            return Response({'username': 'Not specified'}, status.HTTP_404_NOT_FOUND)
-        except models.User.DoesNotExist:
-            return Response({'username': 'The specified user does not exist'}, status.HTTP_404_NOT_FOUND)
+            return Response({'message': 'Wrong input'}, status.HTTP_404_NOT_FOUND)
+
+    @action(methods=['GET'], detail=False, url_path="(?P<userpk>[^/.]+)/liked", url_name="user_liked")
+    def liked(self, request,userpk):
+        user = self.queryset.filter(pk=userpk).first()
+        liked = []
+        favorited = user.favorited
+        postSet = models.Post.objects.all()
+        for _post in user.favorited.all():
+            liked.append(_post.id)
+
+        print(liked)
+        posts = postSet.filter(id__in=liked).order_by('-created_at')
+        page = self.paginate_queryset(posts)
+        serialized_posts = serializers.PostSerializerWithUser(page, many=True)
+        return self.get_paginated_response(serialized_posts.data)
+
 
 class PostsFromUserView(viewsets.ReadOnlyModelViewSet):
     """
