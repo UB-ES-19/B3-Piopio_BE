@@ -87,7 +87,6 @@ class UserView(viewsets.ModelViewSet):
             username = request.data.get('username')
             other = self.queryset.get(username=username)
             q = self.queryset.filter(pk=request.user.pk).first()
-
             if other.pk != q.pk:
                 if q.followings.all().filter(username=username).exists():
                     q.followings.remove(other)
@@ -100,6 +99,36 @@ class UserView(viewsets.ModelViewSet):
                 return Response({'username': "Correct"}, status.HTTP_201_CREATED)
 
             return Response({'username': 'You can\'t follow yourself'}, status.HTTP_404_NOT_FOUND)
+
+        except ValueError:
+            return Response({'username': 'Not specified'}, status.HTTP_404_NOT_FOUND)
+        except models.User.DoesNotExist:
+            return Response({'username': 'The specified user does not exist'}, status.HTTP_404_NOT_FOUND)
+
+    @action(methods=['POST'], detail=False, url_path="like/(?P<postpk>[^/.]+)", permission_classes=(IsAuthenticated,), url_name="user_like")
+    def like(self, request,postpk):
+        try:
+            user = self.queryset.filter(pk=request.user.pk).first()
+            postSet = models.Post.objects.all()
+            post = postSet.filter(id=postpk).get()
+            favorited = user.favorited
+            for _post in user.favorited.all():
+                if(_post == post):
+                    favorited.remove(post)
+                    post.favorited_count = post.favorited_count-1
+                    print(post.favorited_count)
+                    user.save()
+                    post.save()
+                    return Response({'message': "UNLIKED!"}, status.HTTP_201_CREATED)
+
+
+            favorited.add(post)
+            post.favorited_count = post.favorited_count+1
+            user.save()
+            post.save()
+            print(post.favorited_count)
+
+            return Response({'message': "LIKED!"}, status.HTTP_201_CREATED)
 
         except ValueError:
             return Response({'username': 'Not specified'}, status.HTTP_404_NOT_FOUND)
@@ -189,6 +218,9 @@ class PostView(viewsets.ModelViewSet):
         page = self.paginate_queryset(posts)
         serialized_posts = serializers.PostSerializerWithUser(page, many=True)
         return self.get_paginated_response(serialized_posts.data)
+
+
+        
 
 
     @action(methods=['GET'], detail=False, url_path="search", url_name="posts_search")
