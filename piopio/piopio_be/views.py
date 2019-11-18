@@ -180,14 +180,11 @@ class PostView(viewsets.ModelViewSet):
         related = []
         userSet = models.User.objects.all()
         followings = userSet.filter(id=userpk).get().followings.all()
-        followers = userSet.filter(id=userpk).get().followers.all()
         for _user in followings:
-            related.append(_user)
-        for _user in followers:
             related.append(_user)
         user = request.user
         related.append(user)
-        posts = self.get_queryset().filter(user_id__in=related)
+        posts = self.get_queryset().filter(user_id__in=related).order_by('-created_at')
         page = self.paginate_queryset(posts)
         serialized_posts = serializers.PostSerializerWithUser(page, many=True)
         return self.get_paginated_response(serialized_posts.data)
