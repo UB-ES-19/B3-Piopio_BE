@@ -172,6 +172,25 @@ class PostView(viewsets.ModelViewSet):
         serialized_posts = serializers.PostSerializerWithUser(page, many=True)
         return self.get_paginated_response(serialized_posts.data)
 
+
+    @action(methods=['GET'], detail=False, permission_classes=(IsAuthenticated,), url_path="(?P<userpk>[^/.]+)/all_related", url_name="all_related_post")
+    def related(self, request,userpk):
+        """
+        Returns the list of followed & followers & user's posts.
+        """
+        related = []
+        userSet = models.User.objects.all()
+        followings = userSet.filter(id=userpk).get().followings.all()
+        for _user in followings:
+            related.append(_user)
+        user = request.user
+        related.append(user)
+        posts = self.get_queryset().filter(user_id__in=related).order_by('-created_at')
+        page = self.paginate_queryset(posts)
+        serialized_posts = serializers.PostSerializerWithUser(page, many=True)
+        return self.get_paginated_response(serialized_posts.data)
+
+
     @action(methods=['GET'], detail=False, url_path="search", url_name="posts_search")
     def search(self, request):
         try:
@@ -188,6 +207,7 @@ class PostView(viewsets.ModelViewSet):
         page = self.paginate_queryset(posts_queryset)
         serialized_posts = self.get_serializer(page, many=True)
         return self.get_paginated_response(serialized_posts.data)
+
 
 
 class UserFollowerView(viewsets.GenericViewSet,
