@@ -27,6 +27,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     followers = models.ManyToManyField('self', related_name='follower', symmetrical=False)
     following_count = models.IntegerField(default=0)
     follower_count = models.IntegerField(default=0)
+    favorited = models.ManyToManyField("Post",related_name="favorited",symmetrical=False)
+    retweeted = models.ManyToManyField("Post",related_name="retweeted",symmetrical=False)
 
     REQUIRED_FIELDS = ['email', 'password']
     USERNAME_FIELD = 'username'
@@ -52,6 +54,8 @@ class Post(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     type = models.CharField(max_length=10)
+    favorited_count = models.IntegerField(default=0)
+    retweeted_count = models.IntegerField(default=0)
 
     def __str__(self):
         return self.content
