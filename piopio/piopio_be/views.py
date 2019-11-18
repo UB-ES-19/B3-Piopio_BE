@@ -234,3 +234,34 @@ class UserFollwoingView(viewsets.GenericViewSet,
         page = self.paginate_queryset(followings)
         serialized_followings = self.get_serializer(page, many=True)
         return self.get_paginated_response(serialized_followings.data)
+
+
+class UserNestedFollowerView(viewsets.GenericViewSet,
+                      mixins.ListModelMixin):
+    """
+    Nested view for retrieving and listing the posts of a user
+    """
+    queryset = models.User.objects.all()
+    serializer_class = serializers.UserDefaultSerializer
+
+    def list(self, request, user_pk=None, *args, **kwargs):
+        posts = self.get_queryset().get(pk=user_pk)
+        followers = posts.followers.all()
+        page = self.paginate_queryset(followers)
+        serialized_posts = self.get_serializer(page, many=True)
+        return self.get_paginated_response(serialized_posts.data)
+
+
+class UserNestedFollowingsView(viewsets.ReadOnlyModelViewSet):
+    """
+    Nested view for retrieving and listing the posts of a user
+    """
+    queryset = models.User.objects.all()
+    serializer_class = serializers.UserDefaultSerializer
+
+    def list(self, request, user_pk=None, *args, **kwargs):
+        posts = self.get_queryset().get(pk=user_pk)
+        followings = posts.followers.all()
+        page = self.paginate_queryset(followings)
+        serialized_posts = self.get_serializer(page, many=True)
+        return self.get_paginated_response(serialized_posts.data)
