@@ -60,6 +60,215 @@ Content-Type: application/json
     "access": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNTcwMjc5OTA4LCJqdGkiOiIxYTEwNDRkM2E0YjY0YmI0OGJhYzE4Y2RmYmJmMWRiMSIsInVzZXJfaWQiOjF9.Rdt8lJdEFdz-4-rN-ziPYj2L58pdYlAWh6YevluGM94"
 }
 ```
+
+## LIKE
+#### LIKE&UNLIKE a post:
+```
+POST /api/users/like/{postId}/
+Host: localhost:8000
+Content-Type: application/json
+Authorization: Bearer <access token>
+```
+Response
+
+
+```
+Status: 201 Created
+Content-Type: application/json
+
+{
+    "message": "LIKED!"
+}
+```
+
+```
+Status: 201 Created
+Content-Type: application/json
+
+{
+    "message": "UNLIKED!"
+}
+```
+
+#### USER'S LIKED POSTS' LIST:
+```
+POST /api/users/{user_id}/liked/
+Host: localhost:8000
+Content-Type: application/json
+Authorization: Bearer <access token>
+```
+
+Response
+```
+{
+    "count": 2,
+    "next": null,
+    "previous": null,
+    "results": [
+        {
+            "id": 8,
+            "content": "gagagaga",
+            "type": "<text>",
+            "media": [
+                {
+                    "url": "http://..."
+                }
+            ],
+            "user": {
+                "id": 2,
+                "username": "onebu",
+                "email": "onebu@test.com",
+                "profile": {
+                    "first_name": "Jhon",
+                    "last_name": "Ash"
+                },
+                "following_count": 2,
+                "follower_count": 1,
+                "followers": [
+                    1
+                ],
+                "following": [
+                    1
+                ]
+            },
+            "created_at": "2019-11-18T17:41:53.561843Z"
+        },
+        {
+            "id": 6,
+            "content": "hohohoho",
+            "type": "<text>",
+            "media": [
+                {
+                    "url": "http://..."
+                }
+            ],
+            "user": {
+                "id": 2,
+                "username": "onebu",
+                "email": "onebu@test.com",
+                "profile": {
+                    "first_name": "Jhon",
+                    "last_name": "Ash"
+                },
+                "following_count": 2,
+                "follower_count": 1,
+                "followers": [
+                    1
+                ],
+                "following": [
+                    1
+                ]
+            },
+            "created_at": "2019-11-18T17:41:41.767335Z"
+        }
+    ]
+}
+```
+
+## RETWEET
+#### RETWEET&UNRETWEET a post:
+```
+POST /api/users/retweet/{postId}/
+Host: localhost:8000
+Content-Type: application/json
+Authorization: Bearer <access token>
+```
+Response
+
+
+```
+Status: 201 Created
+Content-Type: application/json
+
+{
+    "message": "RETWEETED!"
+}
+```
+
+```
+Status: 201 Created
+Content-Type: application/json
+
+{
+    "message": "UNRETWEETED!"
+}
+```
+
+#### USER'S RETWEETED POSTS' LIST:
+```
+POST /api/users/{user_id}/retweetd/
+Host: localhost:8000
+Content-Type: application/json
+Authorization: Bearer <access token>
+```
+
+Response
+```
+{
+    "count": 2,
+    "next": null,
+    "previous": null,
+    "results": [
+        {
+            "id": 8,
+            "content": "gagagaga",
+            "type": "<text>",
+            "media": [
+                {
+                    "url": "http://..."
+                }
+            ],
+            "user": {
+                "id": 2,
+                "username": "onebu",
+                "email": "onebu@test.com",
+                "profile": {
+                    "first_name": "Jhon",
+                    "last_name": "Ash"
+                },
+                "following_count": 2,
+                "follower_count": 1,
+                "followers": [
+                    1
+                ],
+                "following": [
+                    1
+                ]
+            },
+            "created_at": "2019-11-18T17:41:53.561843Z"
+        },
+        {
+            "id": 6,
+            "content": "hohohoho",
+            "type": "<text>",
+            "media": [
+                {
+                    "url": "http://..."
+                }
+            ],
+            "user": {
+                "id": 2,
+                "username": "onebu",
+                "email": "onebu@test.com",
+                "profile": {
+                    "first_name": "Jhon",
+                    "last_name": "Ash"
+                },
+                "following_count": 2,
+                "follower_count": 1,
+                "followers": [
+                    1
+                ],
+                "following": [
+                    1
+                ]
+            },
+            "created_at": "2019-11-18T17:41:41.767335Z"
+        }
+    ]
+}
+```
+
 ## Follows
 #### List all Followers:
 ```
@@ -434,6 +643,29 @@ Content-Type: application/json
 }
 ```
 
+#### Get info from authenticated user
+```
+GET /api/users/me/
+Host: localhost:8000
+Content-Type: application/json
+Authorization: Bearer <access token>
+```
+Response
+```
+Status: 200 OK
+Content-Type: application/json
+
+{
+    "id": 2,
+    "username": "test",
+    "email": "test@test.com",
+    "profile": {
+        "first_name": "test",
+        "last_name": "test"
+    }
+}
+```
+
 #### Create User:
 
 ```
@@ -644,8 +876,80 @@ Content-Type: application/json
     ]
 }
 ```
+#### GET follwed users' & user's post
 
+```
+GET /api/posts/{user_id}/all_related/
+Host: localhost:8000
+Content-Type: application/json
+```
+Response
+```
+{
+    "count": 2,
+    "next": null,
+    "previous": null,
+    "results": [
+        {
+            "id": 8,
+            "content": "gagagaga",
+            "type": "<text>",
+            "media": [
+                {
+                    "url": "http://..."
+                }
+            ],
+            "user": {
+                "id": 2,
+                "username": "onebu",
+                "email": "onebu@test.com",
+                "profile": {
+                    "first_name": "Jhon",
+                    "last_name": "Ash"
+                },
+                "following_count": 2,
+                "follower_count": 1,
+                "followers": [
+                    1
+                ],
+                "following": [
+                    1
+                ]
+            },
+            "created_at": "2019-11-18T17:41:53.561843Z"
+        },
+        {
+            "id": 6,
+            "content": "hohohoho",
+            "type": "<text>",
+            "media": [
+                {
+                    "url": "http://..."
+                }
+            ],
+            "user": {
+                "id": 2,
+                "username": "onebu",
+                "email": "onebu@test.com",
+                "profile": {
+                    "first_name": "Jhon",
+                    "last_name": "Ash"
+                },
+                "following_count": 2,
+                "follower_count": 1,
+                "followers": [
+                    1
+                ],
+                "following": [
+                    1
+                ]
+            },
+            "created_at": "2019-11-18T17:41:41.767335Z"
+        }
+    ]
+}
 
+```
 #### Get Post by ID:
 ```
 GET /api/posts/<post_id>
