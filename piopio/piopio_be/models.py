@@ -43,6 +43,11 @@ class User(AbstractBaseUser, PermissionsMixin):
 class Profile(models.Model):
     first_name = models.CharField(default="Jhon ", max_length=30)
     last_name = models.CharField(default="Ash ", max_length=150)
+    banner_url = models.CharField(max_length=100, blank=True)
+    avatar_url = models.CharField(max_length=100, blank=True)
+    birthday = models.DateTimeField(null=True, blank=True)
+    description = models.CharField(max_length=240, blank=True)
+
     user = models.OneToOneField(User, on_delete=models.CASCADE)
 
     def __str__(self):

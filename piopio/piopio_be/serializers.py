@@ -15,7 +15,23 @@ class UserProfileSerializer(serializers.ModelSerializer):
         model = Profile
         fields = [
             'first_name',
-            'last_name'
+            'last_name',
+            'banner_url',
+            'avatar_url',
+            'birthday',
+            'description'
+        ]
+
+
+class UserUpdateSerializer(WritableNestedModelSerializer):
+
+    profile = UserProfileSerializer(required=True)
+
+    class Meta:
+        model = User
+        fields = [
+            "id",
+            "profile",
         ]
 
 
