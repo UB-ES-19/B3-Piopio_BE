@@ -203,8 +203,11 @@ class PostsFromUserView(viewsets.ReadOnlyModelViewSet):
 
     def list(self, request, user_pk=None, *args, **kwargs):
         posts = self.get_queryset().filter(user_id=user_pk)
+        ids = models.RetweetedTable.objects.filter(user=user_pk).values_list('post', flat=True)
+        posts = posts | self.get_queryset().filter(id__in=ids)
+        posts = add_likes_and_retweets(posts, user_pk)
         page = self.paginate_queryset(posts)
-        serialized_posts = serializers.PostSerializerWithUser(page, many=True)
+        serialized_posts = serializers.PostSerializerWLikedRetweet(page, many=True)
         return self.get_paginated_response(serialized_posts.data)
 
     def retrieve(self, request, pk=None, user_pk=None, *args, **kwargs):
