@@ -113,9 +113,19 @@ class PostSerializerWithUser(serializers.ModelSerializer):
     media = MediaSerializer(read_only=True, source="media_set", many=True)
 
     class Meta:
-        fields = ('id', 'content', 'type', 'media', 'user', 'created_at', )
+        fields = ('id', 'content', 'type', 'media', 'user', 'created_at','favorited_count', 'retweeted_count')
         model = Post
 
+
+class PostSerializerWLikedRetweet(serializers.ModelSerializer):
+    liked = serializers.CharField()
+    retweeted = serializers.CharField()
+    user = UserDefaultSerializer(read_only=True)
+    media = MediaSerializer(read_only=True, source="media_set", many=True)
+
+    class Meta:
+        fields = ('id', 'content', 'type', 'media', 'user', 'created_at', 'liked', 'retweeted', 'favorited_count', 'retweeted_count')
+        model = Post
 
 #Serializers to show nested manytomany relations
 class EachUserSerializer(serializers.ModelSerializer):
