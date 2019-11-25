@@ -1,6 +1,6 @@
 from django.contrib.auth.base_user import BaseUserManager
 from django.utils.translation import ugettext_lazy as _
-import piopio_be.models
+from piopio_be import models
 
 
 class PiopioUserManager(BaseUserManager):
@@ -27,7 +27,7 @@ class PiopioUserManager(BaseUserManager):
         user.set_password(password)
         user.save()
         # Create and save Profile
-        profile = piopio_be.models.Profile(
+        profile = models.Profile(
             first_name=profile.get('first_name'),
             last_name=profile.get('last_name'),
             user=user

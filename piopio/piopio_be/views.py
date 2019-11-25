@@ -5,10 +5,12 @@ from rest_framework.decorators import api_view
 
 from piopio_be import serializers, models, permissions
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from django.shortcuts import get_list_or_404, get_object_or_404
 from django.core.paginator import Paginator
-
+from django.db.models import Subquery, Value, DateTimeField, F, CharField
+from piopio_be.django_custom_join import join_to_queryset
 # Create your views here.
-
+from django.db.models import Case, When
 
 class UserView(viewsets.ModelViewSet):
     queryset = models.User.objects.all()
@@ -108,83 +110,89 @@ class UserView(viewsets.ModelViewSet):
             return Response({'username': 'The specified user does not exist'}, status.HTTP_404_NOT_FOUND)
 
     @action(methods=['POST'], detail=False, url_path="like/(?P<postpk>[^/.]+)", permission_classes=(IsAuthenticated,), url_name="user_like")
-    def like(self, request,postpk):
-        try:
-            user = self.queryset.filter(pk=request.user.pk).first()
-            postSet = models.Post.objects.all()
-            post = postSet.filter(id=postpk).get()
-            favorited = user.favorited
-            for _post in user.favorited.all():
-                if(_post == post):
-                    favorited.remove(post)
-                    post.favorited_count = post.favorited_count-1
-                    print(post.favorited_count)
-                    user.save()
-                    post.save()
-                    return Response({'message': "UNLIKED!"}, status.HTTP_201_CREATED)
+    def like(self, request, postpk):
+        return self.add_field_tweet(postpk, request, models.LikedTable, "Liked", "Removed like")
 
+    @action(methods=['POST'], detail=False, url_path="retweet/(?P<postpk>[^/.]+)",
+            permission_classes=(IsAuthenticated,), url_name="user_retweet")
+    def tweet(self, request, postpk):
+        return self.add_field_tweet(postpk, request, models.RetweetedTable, "Retweeted", "Removed retweet")
 
-            favorited.add(post)
-            post.favorited_count = post.favorited_count+1
-            user.save()
-            post.save()
-            print(post.favorited_count)
-
-            return Response({'message': "LIKED!"}, status.HTTP_201_CREATED)
-        except ValueError:
-            return Response({'message': 'Wrong input'}, status.HTTP_404_NOT_FOUND)
-    @action(methods=['POST'], detail=False, url_path="retweet/(?P<postpk>[^/.]+)", permission_classes=(IsAuthenticated,), url_name="user_retweet")
-    def tweet(self, request,postpk):
-        try:
-            user = self.queryset.filter(pk=request.user.pk).first()
-            postSet = models.Post.objects.all()
-            post = postSet.filter(id=postpk).get()
-            retweeted = user.retweeted
-            for _post in user.retweeted.all():
-                if(_post == post):
-                    retweeted.remove(post)
-                    post.retweeted_count = post.retweeted_count-1
-                    print(post.retweeted_count)
-                    user.save()
-                    post.save()
-                    return Response({'message': "UNRETWEETED!"}, status.HTTP_201_CREATED)
-
-
-            retweeted.add(post)
-            post.retweeted_count = post.retweeted_count+1
-            user.save()
-            post.save()
-
-            return Response({'message': "RETWEETED!"}, status.HTTP_201_CREATED)
-        except ValueError:
-            return Response({'message': 'Wrong input'}, status.HTTP_404_NOT_FOUND)
+    def add_field_tweet(self, postpk, request, model, pos_msg, neg_msg):
+        user = self.queryset.get(pk=request.user.pk)
+        post = get_object_or_404(models.Post, pk=postpk)
+        post_to_remove = model.objects.filter(user=user).filter(post=post)
+        if post_to_remove.count() != 0:
+            # Delete like
+            post_to_remove.first().delete()
+            return Response({'message': neg_msg}, status.HTTP_201_CREATED)
+        else:
+            # Create like
+            model.objects.create(user=user, post=post)
+            return Response({'message': pos_msg}, status.HTTP_201_CREATED)
 
     @action(methods=['GET'], detail=False, url_path="(?P<userpk>[^/.]+)/liked", url_name="user_liked")
-    def liked(self, request,userpk):
-        user = self.queryset.filter(pk=userpk).first()
-        liked = []
-        favorited = user.favorited
-        postSet = models.Post.objects.all()
-        for _post in user.favorited.all():
-            liked.append(_post.id)
+    def liked(self, request, userpk):
+        user = get_object_or_404(models.User, pk=userpk)
 
-        posts = postSet.filter(id__in=liked).order_by('-created_at')
+        filtered_posts = models.LikedTable.objects.filter(user=user)
+        posts_liked = filtered_posts.values_list('post', flat=True)
+        sorted_posts = filtered_posts.order_by('post_id')
+        posts = models.Post.objects.filter(id__in=posts_liked)
+        # TODO: sort by liked date
+
+        posts = add_likes_and_retweets(posts, user)
         page = self.paginate_queryset(posts)
-        serialized_posts = serializers.PostSerializerWithUser(page, many=True)
+        serialized_posts = serializers.PostSerializerWLikedRetweet(page, many=True)
         return self.get_paginated_response(serialized_posts.data)
 
     @action(methods=['GET'], detail=False, url_path="(?P<userpk>[^/.]+)/retweeted", url_name="user_retweeted")
-    def tweeted(self, request,userpk):
-        user = self.queryset.filter(pk=userpk).first()
-        retweet = []
-        retweeted = user.retweeted
-        postSet = models.Post.objects.all()
-        for _post in user.retweeted.all():
-            retweet.append(_post.id)
-        posts = postSet.filter(id__in=retweet).order_by('-created_at')
+    def retweeted(self, request, userpk):
+        user = get_object_or_404(models.User, pk=userpk)
+
+        filtered_posts = models.RetweetedTable.objects.filter(user=user)
+        posts_retweeted = filtered_posts.values_list('post', flat=True)
+        sorted_posts = filtered_posts.order_by('post_id')
+        posts = models.Post.objects.filter(id__in=posts_retweeted)
+        # TODO: sort by retweeted date
+
+        posts = add_likes_and_retweets(posts, user)
         page = self.paginate_queryset(posts)
-        serialized_posts = serializers.PostSerializerWithUser(page, many=True)
+        serialized_posts = serializers.PostSerializerWLikedRetweet(page, many=True)
         return self.get_paginated_response(serialized_posts.data)
+
+    @action(methods=['GET'], detail=False, permission_classes=(IsAuthenticated,),
+            url_path="(?P<userpk>[^/.]+)/all_related", url_name="all_related_post")
+    def related(self, request, userpk):
+        """
+        Returns the list of followers & user's posts.
+        """
+        related = []
+        followings = models.User.objects.all().get(id=userpk).followings.values()
+        for _user in followings:
+            related.append(_user)
+
+        user = request.user
+        related.append(user)
+        posts = models.Post.objects.filter(user_id__in=related).order_by('-created_at')
+        posts = add_likes_and_retweets(posts, user)
+
+        page = self.paginate_queryset(posts)
+        serialized_posts = serializers.PostSerializerWLikedRetweet(page, many=True)
+        return self.get_paginated_response(serialized_posts.data)
+
+
+def add_likes_and_retweets(posts, user):
+    # Add liked field
+    liked_posts = models.LikedTable.objects.filter(user=user).values_list('post', flat=True)
+    posts = posts.annotate(liked=Case(When(id__in=liked_posts, then=Value('true')), default=Value('false'), output_field=CharField()))
+
+    # Add retweeted field
+    retweeted_posts = models.RetweetedTable.objects.filter(user=user).values_list('post', flat=True)
+    posts = posts.annotate(retweeted=Case(When(id__in=retweeted_posts, then=Value('true')), default=Value('false'), output_field=CharField()))
+
+    return posts.order_by('-created_at')
+
 
 class PostsFromUserView(viewsets.ReadOnlyModelViewSet):
     """
@@ -195,8 +203,11 @@ class PostsFromUserView(viewsets.ReadOnlyModelViewSet):
 
     def list(self, request, user_pk=None, *args, **kwargs):
         posts = self.get_queryset().filter(user_id=user_pk)
+        ids = models.RetweetedTable.objects.filter(user=user_pk).values_list('post', flat=True)
+        posts = posts | self.get_queryset().filter(id__in=ids)
+        posts = add_likes_and_retweets(posts, user_pk)
         page = self.paginate_queryset(posts)
-        serialized_posts = serializers.PostSerializerWithUser(page, many=True)
+        serialized_posts = serializers.PostSerializerWLikedRetweet(page, many=True)
         return self.get_paginated_response(serialized_posts.data)
 
     def retrieve(self, request, pk=None, user_pk=None, *args, **kwargs):
@@ -244,35 +255,16 @@ class PostView(viewsets.ModelViewSet):
     @action(methods=['GET'], detail=False, permission_classes=(IsAuthenticated,), url_path="me", url_name="posts_me")
     def me(self, request):
         """
-        Returns the list of the authenticated user's posts.
+        Returns the list of the authenticated user's posts and their retweets
         """
         user = request.user
         posts = self.get_queryset().filter(user_id=user.pk)
+        ids = models.RetweetedTable.objects.filter(user=user).values_list('post', flat=True)
+        posts = posts | self.get_queryset().filter(id__in=ids)
+        posts = add_likes_and_retweets(posts, user)
         page = self.paginate_queryset(posts)
-        serialized_posts = serializers.PostSerializerWithUser(page, many=True)
+        serialized_posts = serializers.PostSerializerWLikedRetweet(page, many=True)
         return self.get_paginated_response(serialized_posts.data)
-
-
-    @action(methods=['GET'], detail=False, permission_classes=(IsAuthenticated,), url_path="(?P<userpk>[^/.]+)/all_related", url_name="all_related_post")
-    def related(self, request,userpk):
-        """
-        Returns the list of followed & followers & user's posts.
-        """
-        related = []
-        userSet = models.User.objects.all()
-        followings = userSet.filter(id=userpk).get().followings.all()
-        for _user in followings:
-            related.append(_user)
-        user = request.user
-        related.append(user)
-        posts = self.get_queryset().filter(user_id__in=related).order_by('-created_at')
-        page = self.paginate_queryset(posts)
-        serialized_posts = serializers.PostSerializerWithUser(page, many=True)
-        return self.get_paginated_response(serialized_posts.data)
-
-
-        
-
 
     @action(methods=['GET'], detail=False, url_path="search", url_name="posts_search")
     def search(self, request):
