@@ -170,12 +170,13 @@ class UserView(viewsets.ModelViewSet):
         related = []
         followings = models.User.objects.all().get(id=userpk).followings.values()
         for _user in followings:
-            related.append(_user)
+            print(_user)
+            related.append(_user['id'])
 
-        user = request.user
-        related.append(user)
+        #user = request.user
+        related.append(userpk)
         posts = models.Post.objects.filter(user_id__in=related).order_by('-created_at')
-        posts = add_likes_and_retweets(posts, user)
+        posts = add_likes_and_retweets(posts, userpk)
 
         page = self.paginate_queryset(posts)
         serialized_posts = serializers.PostSerializerWLikedRetweet(page, many=True)
