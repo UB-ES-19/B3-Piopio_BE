@@ -125,7 +125,7 @@ class UserView(viewsets.ModelViewSet):
         if post_to_remove.count() != 0:
             # Delete like
             post_to_remove.first().delete()
-            return Response({'message': neg_msg}, status.HTTP_201_CREATED)
+            return Response({'message': neg_msg}, status.HTTP_200_OK)
         else:
             # Create like
             model.objects.create(user=user, post=post)

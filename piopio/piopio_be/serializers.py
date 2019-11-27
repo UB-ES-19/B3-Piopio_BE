@@ -31,9 +31,13 @@ class UserUpdateSerializer(WritableNestedModelSerializer):
         model = User
         fields = [
             "id",
+            "username",
+            "email",
             "profile",
+            "following_count",
+            "follower_count",
         ]
-
+        read_only_fields = ('id', 'username', 'email', "following_count", "follower_count", )
 
 class UserDefaultSerializer(WritableNestedModelSerializer):
 
