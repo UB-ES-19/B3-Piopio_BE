@@ -15,9 +15,29 @@ class UserProfileSerializer(serializers.ModelSerializer):
         model = Profile
         fields = [
             'first_name',
-            'last_name'
+            'last_name',
+            'banner_url',
+            'avatar_url',
+            'birthday',
+            'description'
         ]
 
+
+class UserUpdateSerializer(WritableNestedModelSerializer):
+
+    profile = UserProfileSerializer(required=True)
+
+    class Meta:
+        model = User
+        fields = [
+            "id",
+            "username",
+            "email",
+            "profile",
+            "following_count",
+            "follower_count",
+        ]
+        read_only_fields = ('id', 'username', 'email', "following_count", "follower_count", )
 
 class UserDefaultSerializer(WritableNestedModelSerializer):
 
@@ -97,9 +117,19 @@ class PostSerializerWithUser(serializers.ModelSerializer):
     media = MediaSerializer(read_only=True, source="media_set", many=True)
 
     class Meta:
-        fields = ('id', 'content', 'type', 'media', 'user', 'created_at', )
+        fields = ('id', 'content', 'type', 'media', 'user', 'created_at','favorited_count', 'retweeted_count')
         model = Post
 
+
+class PostSerializerWLikedRetweet(serializers.ModelSerializer):
+    liked = serializers.CharField()
+    retweeted = serializers.CharField()
+    user = UserDefaultSerializer(read_only=True)
+    media = MediaSerializer(read_only=True, source="media_set", many=True)
+
+    class Meta:
+        fields = ('id', 'content', 'type', 'media', 'user', 'created_at', 'liked', 'retweeted', 'favorited_count', 'retweeted_count')
+        model = Post
 
 #Serializers to show nested manytomany relations
 class EachUserSerializer(serializers.ModelSerializer):

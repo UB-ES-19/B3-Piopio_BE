@@ -196,7 +196,7 @@ Content-Type: application/json
 
 #### USER'S RETWEETED POSTS' LIST:
 ```
-POST /api/users/{user_id}/retweetd/
+POST /api/users/{user_id}/retweeted/
 Host: localhost:8000
 Content-Type: application/json
 Authorization: Bearer <access token>
@@ -810,73 +810,41 @@ HTTP 200 OK
 Content-Type: application/json
 
 {
-    "count": 2,
+    "count": 4,
     "next": null,
     "previous": null,
     "results": [
         {
-            "id": 1,
-            "content": "hola, buenas",
-            "created_at": "2019-10-09T17:50:54.544053Z",
+            "id": 4,
+            "content": "antonio",
+            "type": "text",
+            "media": [],
             "user": {
-                "id": 1,
-                "username": "pepe",
-                "email": "pepe@gmail.com",
+                "id": 4,
+                "username": "qwer",
+                "email": "qwer@gmail.com",
                 "profile": {
-                    "first_name": "pepe",
-                    "last_name": "manuel"
-                }
-            }
-        },
-        {
-            "id": 2,
-            "content": "hey, que tal",
-            "created_at": "2019-10-09T22:19:38.395935Z",
-            "user": {
-                "id": 1,
-                "username": "pepe",
-                "email": "pepe@gmail.com",
-                "profile": {
-                    "first_name": "pepe",
-                    "last_name": "manuel"
-                }
-            }
+                    "first_name": "qwer",
+                    "last_name": "qwer",
+                    "banner_url": "",
+                    "avatar_url": "",
+                    "birthday": null,
+                    "description": ""
+                },
+                "following_count": 0,
+                "follower_count": 0,
+                "followers": [],
+                "following": []
+            },
+            "created_at": "2019-11-24T19:56:24.040166Z",
+            "favorited_count": 0,
+            "retweeted_count": 1
         }
     ]
 }
 ```
-```
-GET /api/posts/?limit=1
-Host: localhost:8000
-Content-Type: application/json
-```
-Response
-```
-HTTP 200 OK
-Content-Type: application/json
-{
-    "count": 2,
-    "next": "http://localhost:8000/api/posts/?limit=1&offset=1",
-    "previous": null,
-    "results": [
-        {
-            "id": 1,
-            "content": "content",
-            "created_at": "2019-10-11T15:05:05.973332Z",
-            "user": {
-                "id": 2,
-                "username": "user",
-                "email": "user@mail.com",
-                "profile": {
-                    "first_name": "user",
-                    "last_name": "user"
-                }
-            }
-        }
-    ]
-}
-```
-#### GET follwed users' & user's post
+
+#### GET user's posts + posts from those who are followed by the user
 
 ```
 GET /api/posts/{user_id}/all_related/
@@ -886,70 +854,41 @@ Content-Type: application/json
 Response
 ```
 {
-    "count": 2,
+    "count": 1,
     "next": null,
     "previous": null,
     "results": [
         {
-            "id": 8,
-            "content": "gagagaga",
-            "type": "<text>",
-            "media": [
-                {
-                    "url": "http://..."
-                }
-            ],
+            "id": 2,
+            "content": "yay",
+            "type": "text",
+            "media": [],
             "user": {
-                "id": 2,
-                "username": "onebu",
-                "email": "onebu@test.com",
+                "id": 3,
+                "username": "sutikcram",
+                "email": "sutic2o@gmail.com",
                 "profile": {
-                    "first_name": "Jhon",
-                    "last_name": "Ash"
+                    "first_name": "sutico",
+                    "last_name": "el cramo",
+                    "banner_url": "",
+                    "avatar_url": "",
+                    "birthday": null,
+                    "description": ""
                 },
-                "following_count": 2,
-                "follower_count": 1,
-                "followers": [
-                    1
-                ],
-                "following": [
-                    1
-                ]
+                "following_count": 0,
+                "follower_count": 0,
+                "followers": [],
+                "following": []
             },
-            "created_at": "2019-11-18T17:41:53.561843Z"
-        },
-        {
-            "id": 6,
-            "content": "hohohoho",
-            "type": "<text>",
-            "media": [
-                {
-                    "url": "http://..."
-                }
-            ],
-            "user": {
-                "id": 2,
-                "username": "onebu",
-                "email": "onebu@test.com",
-                "profile": {
-                    "first_name": "Jhon",
-                    "last_name": "Ash"
-                },
-                "following_count": 2,
-                "follower_count": 1,
-                "followers": [
-                    1
-                ],
-                "following": [
-                    1
-                ]
-            },
-            "created_at": "2019-11-18T17:41:41.767335Z"
+            "created_at": "2019-11-24T13:24:38.005567Z",
+            "liked": "false",
+            "retweeted": "true",
+            "favorited_count": 0,
+            "retweeted_count": 0
         }
     ]
 }
 
-```
 #### Get Post by ID:
 ```
 GET /api/posts/<post_id>
@@ -962,24 +901,30 @@ HTTP 200 OK
 Content-Type: application/json
 
 {
-    "id": 2,
-    "content": "content",
-    "type": "<text, image or video>",
-    "media": [
-        {
-            "url": "http://..."
-        }
-    ],
-    "created_at": "2019-10-07T18:42:09.566717Z",
+    "id": 3,
+    "content": "qwerqwer",
+    "type": "text",
+    "media": [],
     "user": {
-        "id": 2,
-        "username": "user",
-        "email": "user@mail.com",
+        "id": 4,
+        "username": "qwer",
+        "email": "qwer@gmail.com",
         "profile": {
-            "first_name": "user",
-            "last_name": "user"
-        }
-    }
+            "first_name": "qwer",
+            "last_name": "qwer",
+            "banner_url": "",
+            "avatar_url": "",
+            "birthday": null,
+            "description": ""
+        },
+        "following_count": 0,
+        "follower_count": 0,
+        "followers": [],
+        "following": []
+    },
+    "created_at": "2019-11-24T19:24:50.246753Z",
+    "favorited_count": 0,
+    "retweeted_count": 0
 }
 ```
 ```
@@ -1147,69 +1092,121 @@ HTTP 200 OK
 Content-Type: application/json
 
 {
-    "count": 2,
+    "count": 4,
     "next": null,
     "previous": null,
     "results": [
         {
-            "id": 1,
-            "content": "hola, buenas",
-            "created_at": "2019-10-09T17:50:54.544053Z",
+            "id": 4,
+            "content": "antonio",
+            "type": "text",
+            "media": [],
             "user": {
-                "id": 1,
-                "username": "pepe",
-                "email": "pepe@gmail.com",
+                "id": 4,
+                "username": "qwer",
+                "email": "qwer@gmail.com",
                 "profile": {
-                    "first_name": "pepe",
-                    "last_name": "manuel"
-                }
-            }
+                    "first_name": "qwer",
+                    "last_name": "qwer",
+                    "banner_url": "",
+                    "avatar_url": "",
+                    "birthday": null,
+                    "description": ""
+                },
+                "following_count": 0,
+                "follower_count": 0,
+                "followers": [],
+                "following": []
+            },
+            "created_at": "2019-11-24T19:56:24.040166Z",
+            "liked": "false",
+            "retweeted": "true",
+            "favorited_count": 0,
+            "retweeted_count": 1
+        },
+        {
+            "id": 3,
+            "content": "qwerqwer",
+            "type": "text",
+            "media": [],
+            "user": {
+                "id": 4,
+                "username": "qwer",
+                "email": "qwer@gmail.com",
+                "profile": {
+                    "first_name": "qwer",
+                    "last_name": "qwer",
+                    "banner_url": "",
+                    "avatar_url": "",
+                    "birthday": null,
+                    "description": ""
+                },
+                "following_count": 0,
+                "follower_count": 0,
+                "followers": [],
+                "following": []
+            },
+            "created_at": "2019-11-24T19:24:50.246753Z",
+            "liked": "false",
+            "retweeted": "true",
+            "favorited_count": -1,
+            "retweeted_count": 0
         },
         {
             "id": 2,
-            "content": "hey, que tal",
-            "created_at": "2019-10-09T22:19:38.395935Z",
+            "content": "yay",
+            "type": "text",
+            "media": [],
             "user": {
-                "id": 1,
+                "id": 3,
+                "username": "sutikcram",
+                "email": "sutic2o@gmail.com",
+                "profile": {
+                    "first_name": "sutico",
+                    "last_name": "el cramo",
+                    "banner_url": "",
+                    "avatar_url": "",
+                    "birthday": null,
+                    "description": ""
+                },
+                "following_count": 0,
+                "follower_count": 0,
+                "followers": [],
+                "following": []
+            },
+            "created_at": "2019-11-24T13:24:38.005567Z",
+            "liked": "false",
+            "retweeted": "true",
+            "favorited_count": 0,
+            "retweeted_count": 0
+        },
+        {
+            "id": 1,
+            "content": "hola",
+            "type": "text",
+            "media": [],
+            "user": {
+                "id": 2,
                 "username": "pepe",
                 "email": "pepe@gmail.com",
                 "profile": {
                     "first_name": "pepe",
-                    "last_name": "manuel"
-                }
-            }
-        }
-    ]
-}
-```
-```
-GET /api/posts/me/?limit=1
-Host: localhost:8000
-Content-Type: application/json
-Authorization: Bearer <access token>
-```
-Response
-```
-HTTP 200 OK
-Content-Type: application/json
-{
-    "count": 2,
-    "next": "http://localhost:8000/api/posts/?limit=1&offset=1",
-    "previous": null,
-    "results": [
-        {
-            "id": 1,
-            "content": "content",
-            "created_at": "2019-10-11T15:05:05.973332Z",
-            "user": {
-                "id": 2,
-                "username": "user",
-                "email": "user@mail.com",
-                "profile": {
-                    "first_name": "user",
-                    "last_name": "user"
-                }
-            }
+                    "last_name": "el pepo",
+                    "banner_url": "",
+                    "avatar_url": "",
+                    "birthday": null,
+                    "description": ""
+                },
+                "following_count": 0,
+                "follower_count": 0,
+                "followers": [],
+                "following": []
+            },
+            "created_at": "2019-11-23T16:23:45.315278Z",
+            "liked": "true",
+            "retweeted": "true",
+            "favorited_count": 0,
+            "retweeted_count": 0
         }
     ]
 }
@@ -1240,56 +1237,60 @@ Content-Type: application/json
     "previous": null,
     "results": [
         {
-            "id": 1,
-            "content": "hola, buenas",
+            "id": 4,
+            "content": "antonio",
             "type": "text",
             "media": [],
             "user": {
-                "id": 1,
-                "username": "pepe",
-                "email": "pepe@gmail.com",
+                "id": 4,
+                "username": "qwer",
+                "email": "qwer@gmail.com",
                 "profile": {
-                    "first_name": "pepe",
-                    "last_name": "manuel"
+                    "first_name": "qwer",
+                    "last_name": "qwer",
+                    "banner_url": "",
+                    "avatar_url": "",
+                    "birthday": null,
+                    "description": ""
                 },
-                "following_count": 1,
-                "follower_count": 3,
-                "followers": [
-                    5,
-                    6
-                ],
-                "following": [
-                    5,
-                    6
-                ]
+                "following_count": 0,
+                "follower_count": 0,
+                "followers": [],
+                "following": []
             },
-            "created_at": "2019-10-09T17:50:54.544053Z"
+            "created_at": "2019-11-24T19:56:24.040166Z",
+            "liked": "false",
+            "retweeted": "false",
+            "favorited_count": 0,
+            "retweeted_count": 1
         },
         {
-            "id": 2,
-            "content": "hey, que tal",
+            "id": 3,
+            "content": "qwerqwer",
             "type": "text",
             "media": [],
             "user": {
-                "id": 1,
-                "username": "pepe",
-                "email": "pepe@gmail.com",
+                "id": 4,
+                "username": "qwer",
+                "email": "qwer@gmail.com",
                 "profile": {
-                    "first_name": "pepe",
-                    "last_name": "manuel"
+                    "first_name": "qwer",
+                    "last_name": "qwer",
+                    "banner_url": "",
+                    "avatar_url": "",
+                    "birthday": null,
+                    "description": ""
                 },
-                "following_count": 1,
-                "follower_count": 3,
-                "followers": [
-                    5,
-                    6
-                ],
-                "following": [
-                    5,
-                    6
-                ]
+                "following_count": 0,
+                "follower_count": 0,
+                "followers": [],
+                "following": []
             },
-            "created_at": "2019-10-09T22:19:38.395935Z"
+            "created_at": "2019-11-24T19:24:50.246753Z",
+            "liked": "false",
+            "retweeted": "false",
+            "favorited_count": -1,
+            "retweeted_count": 0
         }
     ]
 }
