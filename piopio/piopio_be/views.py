@@ -7,10 +7,10 @@ from piopio_be import serializers, models, permissions
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.shortcuts import get_list_or_404, get_object_or_404
 from django.core.paginator import Paginator
-from django.db.models import Subquery, Value, DateTimeField, F, CharField
+from django.db.models import Subquery, Value, DateTimeField, F, CharField, OuterRef
 from piopio_be.django_custom_join import join_to_queryset
 # Create your views here.
-from django.db.models import Case, When
+from django.db.models import Case, When, Q
 
 class UserView(viewsets.ModelViewSet):
     queryset = models.User.objects.all()
@@ -183,7 +183,7 @@ class UserView(viewsets.ModelViewSet):
         return self.get_paginated_response(serialized_posts.data)
 
 
-def add_likes_and_retweets(posts, user):
+def add_likes_and_retweets(posts, user, sort=True):
     # Add liked field
     liked_posts = models.LikedTable.objects.filter(user=user).values_list('post', flat=True)
     posts = posts.annotate(liked=Case(When(id__in=liked_posts, then=Value('true')), default=Value('false'), output_field=CharField()))
@@ -192,7 +192,20 @@ def add_likes_and_retweets(posts, user):
     retweeted_posts = models.RetweetedTable.objects.filter(user=user).values_list('post', flat=True)
     posts = posts.annotate(retweeted=Case(When(id__in=retweeted_posts, then=Value('true')), default=Value('false'), output_field=CharField()))
 
-    return posts.order_by('-created_at')
+    if sort:
+        posts = posts.order_by('-created_at')
+
+    return posts
+
+
+def sort_posts_and_retweets(posts, retweets, ids, user):
+    posts = posts | retweets
+    posts = posts.annotate(sort_date=Case(When(id__in=ids,
+            then=Subquery(models.RetweetedTable.objects.filter(post=OuterRef('id')).filter(user=user)[:1].values_list('retweeted_date', flat=True))),
+            default=F('created_at'), output_field=DateTimeField()))
+
+    posts = posts.order_by('-sort_date')
+    return posts
 
 
 class PostsFromUserView(viewsets.ReadOnlyModelViewSet):
@@ -204,9 +217,13 @@ class PostsFromUserView(viewsets.ReadOnlyModelViewSet):
 
     def list(self, request, user_pk=None, *args, **kwargs):
         posts = self.get_queryset().filter(user_id=user_pk)
-        ids = models.RetweetedTable.objects.filter(user=user_pk).values_list('post', flat=True)
-        posts = posts | self.get_queryset().filter(id__in=ids)
-        posts = add_likes_and_retweets(posts, user_pk)
+        retweets = models.RetweetedTable.objects.filter(user=user_pk)
+        ids = retweets.values_list('post', flat=True)
+
+        posts = sort_posts_and_retweets(posts, self.get_queryset().filter(id__in=ids), ids, user_pk)
+
+        posts = add_likes_and_retweets(posts, request.user, sort=False)
+
         page = self.paginate_queryset(posts)
         serialized_posts = serializers.PostSerializerWLikedRetweet(page, many=True)
         return self.get_paginated_response(serialized_posts.data)
@@ -280,8 +297,9 @@ class PostView(viewsets.ModelViewSet):
         except ValueError:
             return Response({'content': 'Not specified'}, status.HTTP_404_NOT_FOUND)
 
+        posts_queryset = add_likes_and_retweets(posts_queryset, request.user)
         page = self.paginate_queryset(posts_queryset)
-        serialized_posts = self.get_serializer(page, many=True)
+        serialized_posts = serializers.PostSerializerWLikedRetweet(page, many=True)
         return self.get_paginated_response(serialized_posts.data)
 
 
