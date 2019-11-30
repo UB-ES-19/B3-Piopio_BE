@@ -1,7 +1,7 @@
 # API serializers
 from drf_writable_nested import WritableNestedModelSerializer
 from rest_framework import serializers, exceptions
-from piopio_be.models import User, Profile, Post, Media
+from piopio_be.models import User, Profile, Post, Media, Notification
 from django.contrib.auth.password_validation import validate_password
 from django.core import exceptions
 
@@ -112,12 +112,21 @@ class PostSerializer(WritableNestedModelSerializer):
         model = Post
 
 
+#Serializers to show nested manytomany relations
+class EachUserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        fields = ('id', 'username')
+        model = User
+
+
 class PostSerializerWithUser(serializers.ModelSerializer):
     user = UserDefaultSerializer(read_only=True)
     media = MediaSerializer(read_only=True, source="media_set", many=True)
+    mentions = EachUserSerializer(many=True, read_only=True)
 
     class Meta:
-        fields = ('id', 'content', 'type', 'media', 'user', 'created_at','favorited_count', 'retweeted_count')
+        fields = ('id', 'content', 'type', 'media', 'user', 'created_at', 'favorited_count', 'retweeted_count', 'mentions')
         model = Post
 
 
@@ -130,13 +139,6 @@ class PostSerializerWLikedRetweet(serializers.ModelSerializer):
     class Meta:
         fields = ('id', 'content', 'type', 'media', 'user', 'created_at', 'liked', 'retweeted', 'favorited_count', 'retweeted_count')
         model = Post
-
-#Serializers to show nested manytomany relations
-class EachUserSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        fields = ('id', 'username')
-        model = User
 
 
 class FollowerSerializer(serializers.ModelSerializer):
@@ -171,3 +173,13 @@ class FollowingDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('followings','id','username')
+
+
+class NotificationsSerializer(serializers.ModelSerializer):
+    user_mentioning = UserDefaultSerializer(read_only=True)
+    user_mentioned = UserDefaultSerializer(read_only=True)
+    post = PostSerializer(read_only=True)
+
+    class Meta:
+        model = Notification
+        fields = ('user_mentioning', 'user_mentioned', 'post', 'notified')

@@ -182,6 +182,13 @@ class UserView(viewsets.ModelViewSet):
         serialized_posts = serializers.PostSerializerWLikedRetweet(page, many=True)
         return self.get_paginated_response(serialized_posts.data)
 
+    @action(methods=['GET'], detail=False, url_path="notifications", permission_classes=(IsAuthenticated,), url_name="user_notifications")
+    def notifications(self, request):
+        user_notifications = models.Notification.objects.filter(user_mentioned=request.user)
+        page = self.paginate_queryset(user_notifications)
+        serialized_users = serializers.NotificationsSerializer(page, many=True)
+        return self.get_paginated_response(serialized_users.data)
+
 
 def add_likes_and_retweets(posts, user, sort=True):
     # Add liked field
@@ -379,3 +386,26 @@ class UserNestedFollowingsView(viewsets.ReadOnlyModelViewSet):
         page = self.paginate_queryset(followings)
         serialized_posts = self.get_serializer(page, many=True)
         return self.get_paginated_response(serialized_posts.data)
+
+
+class NotificationsView(viewsets.GenericViewSet,
+                        mixins.ListModelMixin,
+                        mixins.RetrieveModelMixin):
+    queryset = models.Notification.objects.all()
+    serializer_class = serializers.NotificationsSerializer
+
+    @action(methods=['POST'], detail=False, permission_classes=(IsAuthenticated,), url_path="notified", url_name="notifications_notified")
+    def notified(self, request):
+        try:
+            post_id = request.data.get('post')
+            notification = self.queryset.get(user_mentioned=request.user, post__id=post_id)
+        except ValueError:
+            return Response({'post': 'Not specified'}, status.HTTP_404_NOT_FOUND)
+        except models.Notification.DoesNotExist:
+            return Response({'notification': 'Unable to update notification'}, status.HTTP_404_NOT_FOUND)
+
+        notification.notified = True
+        notification.save()
+        serialized_notification = self.get_serializer(notification)
+
+        return Response(serialized_notification.data)

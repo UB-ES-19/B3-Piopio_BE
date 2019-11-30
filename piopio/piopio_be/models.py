@@ -3,10 +3,16 @@ from django.core.validators import RegexValidator
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from piopio_be.managers import PiopioUserManager
+from django.db.models.signals import post_save, post_delete
+from django.dispatch import receiver
+import re
 
 
 USERNAME_REGEX = '^[a-zA-Z0-9-_]*$'
-
+MENTION_REGEX1 = r'\s[@][a-zA-Z0-9-_]+[\s\W]' # Match space+@user+[space or non-word char]
+MENTION_REGEX2 = r'^[@][a-zA-Z0-9-_]+[\s\W]' # 4 regex because I do not why (^|\s) and (\s|$) do not work
+MENTION_REGEX3 = r'[@][a-zA-Z0-9-_]+$' #
+MENTION_REGEX4 = r'^[@][a-zA-Z0-9-_]+$'
 
 class User(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(
@@ -71,6 +77,10 @@ class Post(models.Model):
     class Meta:
         ordering = ('created_at',)
 
+    @property
+    def mentions(self):
+        users_ids = Notification.objects.filter(post=self).values_list('user_mentioned', flat=True)
+        return User.objects.filter(id__in=users_ids)
 
 class Media(models.Model):
     url = models.CharField(max_length=200)
@@ -102,66 +112,95 @@ class RetweetedTable(models.Model):
         ordering = ('retweeted_date',)
 
 
-from piopio_be import models
-from django.db.models.signals import post_save, post_delete
-from django.dispatch import receiver
+class Notification(models.Model):
+    user_mentioning = models.ForeignKey(User, related_name="user_mentioning", on_delete=models.CASCADE)
+    user_mentioned = models.ForeignKey(User, related_name="user_mentioned", on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    notified = models.BooleanField(default=False)
 
 
-@receiver(post_save, sender=models.LikedTable)
+@receiver(post_save, sender=Post)
+def post_post_save(sender, instance, **kwargs):
+    """
+    When a post is saved, if it contains a reference create a new notification.
+    """
+    content = instance.content
+    matches = re.findall(MENTION_REGEX1, content)
+    matches += re.findall(MENTION_REGEX2, content)
+    matches += re.findall(MENTION_REGEX3, content)
+    matches += re.findall(MENTION_REGEX4, content)
+
+    users_notified = []
+    for match in matches:
+        user = re.findall(r'[a-zA-Z0-9-_]+', match)
+
+        if len(user) != 0:
+            # The username will always be the first match
+            user = user[0]
+
+            user_search = User.objects.filter(username=user)
+            if user_search.exists():
+                user_search = user_search.first()
+                if user_search.id not in users_notified:
+                    Notification.objects.create(user_mentioning=instance.user, user_mentioned=user_search, post=instance)
+                    users_notified.append(user_search.id)
+
+
+@receiver(post_save, sender=LikedTable)
 def like_post_save(sender, instance, **kwargs):
     """
     When a post is liked add it to the counter
     """
     try:
         # Update the number of likes
-        num_reviews = models.Post.objects.get(id=instance.post_id)
+        num_reviews = Post.objects.get(id=instance.post_id)
         num_reviews.favorited_count += 1
         num_reviews.save()
-    except models.Post.DoesNotExist:
+    except Post.DoesNotExist:
         # Never should happen
         return
 
 
-@receiver(post_delete, sender=models.LikedTable)
+@receiver(post_delete, sender=LikedTable)
 def like_post_delete(sender, instance, **kwargs):
     """
     When a post has the liked removed substract it from to the counter
     """
     try:
         # Update the number of likes
-        num_reviews = models.Post.objects.get(id=instance.post_id)
+        num_reviews = Post.objects.get(id=instance.post_id)
         num_reviews.favorited_count -= 1
         num_reviews.save()
-    except models.Post.DoesNotExist:
+    except Post.DoesNotExist:
         # Never should happen
         return
 
 
-@receiver(post_save, sender=models.RetweetedTable)
+@receiver(post_save, sender=RetweetedTable)
 def retweet_post_save(sender, instance, **kwargs):
     """
     When a post is retweeted add it to the counter
     """
     try:
         # Update the number of retweets
-        num_reviews = models.Post.objects.get(id=instance.post_id)
+        num_reviews = Post.objects.get(id=instance.post_id)
         num_reviews.retweeted_count += 1
         num_reviews.save()
-    except models.Post.DoesNotExist:
+    except Post.DoesNotExist:
         # Never should happen
         return
 
 
-@receiver(post_delete, sender=models.RetweetedTable)
+@receiver(post_delete, sender=RetweetedTable)
 def retweet_post_delete(sender, instance, **kwargs):
     """
     When a post has the retweet removed substract it from to the counter
     """
     try:
         # Update the number of retweets
-        num_reviews = models.Post.objects.get(id=instance.post_id)
+        num_reviews = Post.objects.get(id=instance.post_id)
         num_reviews.retweeted_count -= 1
         num_reviews.save()
-    except models.Post.DoesNotExist:
+    except Post.DoesNotExist:
         # Never should happen
         return

@@ -131,7 +131,8 @@ Response
                     1
                 ]
             },
-            "created_at": "2019-11-18T17:41:53.561843Z"
+            "created_at": "2019-11-18T17:41:53.561843Z",
+            "mentions" : []
         },
         {
             "id": 6,
@@ -159,7 +160,8 @@ Response
                     1
                 ]
             },
-            "created_at": "2019-11-18T17:41:41.767335Z"
+            "created_at": "2019-11-18T17:41:41.767335Z",
+            "mentions": []
         }
     ]
 }
@@ -235,7 +237,8 @@ Response
                     1
                 ]
             },
-            "created_at": "2019-11-18T17:41:53.561843Z"
+            "created_at": "2019-11-18T17:41:53.561843Z",
+            "mentions": []
         },
         {
             "id": 6,
@@ -263,7 +266,8 @@ Response
                     1
                 ]
             },
-            "created_at": "2019-11-18T17:41:41.767335Z"
+            "created_at": "2019-11-18T17:41:41.767335Z",
+            "mentions": []
         }
     ]
 }
@@ -810,13 +814,49 @@ HTTP 200 OK
 Content-Type: application/json
 
 {
-    "count": 4,
+    "count": 17,
     "next": null,
     "previous": null,
     "results": [
         {
-            "id": 4,
-            "content": "antonio",
+            "id": 17,
+            "content": "@qwer eres un pesao",
+            "type": "text",
+            "media": [],
+            "user": {
+                "id": 3,
+                "username": "sutikcram",
+                "email": "sutic2o@gmail.com",
+                "profile": {
+                    "first_name": "sutico",
+                    "last_name": "el cramo",
+                    "banner_url": "",
+                    "avatar_url": "",
+                    "birthday": null,
+                    "description": ""
+                },
+                "following_count": 0,
+                "follower_count": 1,
+                "followers": [
+                    6
+                ],
+                "following": [
+                    6
+                ]
+            },
+            "created_at": "2019-11-30T15:05:25.288285Z",
+            "favorited_count": 0,
+            "retweeted_count": 0,
+            "mentions": [
+                {
+                    "id": 4,
+                    "username": "qwer"
+                }
+            ]
+        },
+        {
+            "id": 16,
+            "content": "@sutikcram @sutikcram @sutikcram",
             "type": "text",
             "media": [],
             "user": {
@@ -826,19 +866,84 @@ Content-Type: application/json
                 "profile": {
                     "first_name": "qwer",
                     "last_name": "qwer",
-                    "banner_url": "",
-                    "avatar_url": "",
-                    "birthday": null,
-                    "description": ""
+                    "banner_url": "idjjsih8q3wennneyvpi",
+                    "avatar_url": "euvuhkvjfsaubsz0i3ph",
+                    "birthday": "1970-01-01T00:00:00Z",
+                    "description": "soy una iguana"
                 },
                 "following_count": 0,
                 "follower_count": 0,
                 "followers": [],
                 "following": []
             },
-            "created_at": "2019-11-24T19:56:24.040166Z",
+            "created_at": "2019-11-30T13:50:10.098667Z",
             "favorited_count": 0,
-            "retweeted_count": 1
+            "retweeted_count": 0,
+            "mentions": [
+                {
+                    "id": 3,
+                    "username": "sutikcram"
+                }
+            ]
+        },
+        {
+            "id": 15,
+            "content": "@sutikcram, eres un grande",
+            "type": "text",
+            "media": [],
+            "user": {
+                "id": 4,
+                "username": "qwer",
+                "email": "qwer@gmail.com",
+                "profile": {
+                    "first_name": "qwer",
+                    "last_name": "qwer",
+                    "banner_url": "idjjsih8q3wennneyvpi",
+                    "avatar_url": "euvuhkvjfsaubsz0i3ph",
+                    "birthday": "1970-01-01T00:00:00Z",
+                    "description": "soy una iguana"
+                },
+                "following_count": 0,
+                "follower_count": 0,
+                "followers": [],
+                "following": []
+            },
+            "created_at": "2019-11-30T13:49:23.393608Z",
+            "favorited_count": 0,
+            "retweeted_count": 0,
+            "mentions": [
+                {
+                    "id": 3,
+                    "username": "sutikcram"
+                }
+            ]
+        },
+        {
+            "id": 14,
+            "content": "@yo soy",
+            "type": "text",
+            "media": [],
+            "user": {
+                "id": 4,
+                "username": "qwer",
+                "email": "qwer@gmail.com",
+                "profile": {
+                    "first_name": "qwer",
+                    "last_name": "qwer",
+                    "banner_url": "idjjsih8q3wennneyvpi",
+                    "avatar_url": "euvuhkvjfsaubsz0i3ph",
+                    "birthday": "1970-01-01T00:00:00Z",
+                    "description": "soy una iguana"
+                },
+                "following_count": 0,
+                "follower_count": 0,
+                "followers": [],
+                "following": []
+            },
+            "created_at": "2019-11-30T13:48:35.589221Z",
+            "favorited_count": 0,
+            "retweeted_count": 0,
+            "mentions": []
         }
     ]
 }
@@ -884,12 +989,14 @@ Response
             "liked": "false",
             "retweeted": "true",
             "favorited_count": 0,
-            "retweeted_count": 0
+            "retweeted_count": 0,
+            "mentions": []
         }
     ]
 }
-
+```
 #### Get Post by ID:
+
 ```
 GET /api/posts/<post_id>
 Host: localhost:8000
@@ -924,7 +1031,8 @@ Content-Type: application/json
     },
     "created_at": "2019-11-24T19:24:50.246753Z",
     "favorited_count": 0,
-    "retweeted_count": 0
+    "retweeted_count": 0,
+    "mentions": []
 }
 ```
 ```
@@ -1122,7 +1230,8 @@ Content-Type: application/json
             "liked": "false",
             "retweeted": "true",
             "favorited_count": 0,
-            "retweeted_count": 1
+            "retweeted_count": 1,
+            "mentions": []
         },
         {
             "id": 3,
@@ -1150,7 +1259,8 @@ Content-Type: application/json
             "liked": "false",
             "retweeted": "true",
             "favorited_count": -1,
-            "retweeted_count": 0
+            "retweeted_count": 0,
+            "mentions": []
         },
         {
             "id": 2,
@@ -1178,7 +1288,8 @@ Content-Type: application/json
             "liked": "false",
             "retweeted": "true",
             "favorited_count": 0,
-            "retweeted_count": 0
+            "retweeted_count": 0,
+            "mentions": []
         },
         {
             "id": 1,
@@ -1206,7 +1317,8 @@ Content-Type: application/json
             "liked": "true",
             "retweeted": "true",
             "favorited_count": 0,
-            "retweeted_count": 0
+            "retweeted_count": 0,
+            "mentions": []
         }
     ]
 }
@@ -1262,7 +1374,8 @@ Content-Type: application/json
             "liked": "false",
             "retweeted": "false",
             "favorited_count": 0,
-            "retweeted_count": 1
+            "retweeted_count": 1,
+            "mentions": []
         },
         {
             "id": 3,
@@ -1290,7 +1403,8 @@ Content-Type: application/json
             "liked": "false",
             "retweeted": "false",
             "favorited_count": -1,
-            "retweeted_count": 0
+            "retweeted_count": 0,
+            "mentions": []
         }
     ]
 }
@@ -1301,5 +1415,284 @@ Content-Type: application/json
 
 {
     "detail": "Authentication credentials were not provided."
+}
+```
+#### Get all notifications
+```
+GET /api/notifications/
+Host: localhost:8000
+Content-Type: application/json
+Authorization: Bearer <access token>
+```
+```
+{
+    "count": 2,
+    "next": null,
+    "previous": null,
+    "results": [
+        {
+            "user_mentioning": {
+                "id": 4,
+                "username": "qwer",
+                "email": "qwer@gmail.com",
+                "profile": {
+                    "first_name": "qwer",
+                    "last_name": "qwer",
+                    "banner_url": "idjjsih8q3wennneyvpi",
+                    "avatar_url": "euvuhkvjfsaubsz0i3ph",
+                    "birthday": "1970-01-01T00:00:00Z",
+                    "description": "soy una iguana"
+                },
+                "following_count": 0,
+                "follower_count": 0,
+                "followers": [],
+                "following": []
+            },
+            "user_mentioned": {
+                "id": 3,
+                "username": "sutikcram",
+                "email": "sutic2o@gmail.com",
+                "profile": {
+                    "first_name": "sutico",
+                    "last_name": "el cramo",
+                    "banner_url": "",
+                    "avatar_url": "",
+                    "birthday": null,
+                    "description": ""
+                },
+                "following_count": 0,
+                "follower_count": 1,
+                "followers": [
+                    6
+                ],
+                "following": [
+                    6
+                ]
+            },
+            "post": {
+                "id": 15,
+                "content": "@sutikcram, eres un grande",
+                "type": "text",
+                "media": []
+            },
+            "notified": false
+        },
+        {
+            "user_mentioning": {
+                "id": 4,
+                "username": "qwer",
+                "email": "qwer@gmail.com",
+                "profile": {
+                    "first_name": "qwer",
+                    "last_name": "qwer",
+                    "banner_url": "idjjsih8q3wennneyvpi",
+                    "avatar_url": "euvuhkvjfsaubsz0i3ph",
+                    "birthday": "1970-01-01T00:00:00Z",
+                    "description": "soy una iguana"
+                },
+                "following_count": 0,
+                "follower_count": 0,
+                "followers": [],
+                "following": []
+            },
+            "user_mentioned": {
+                "id": 3,
+                "username": "sutikcram",
+                "email": "sutic2o@gmail.com",
+                "profile": {
+                    "first_name": "sutico",
+                    "last_name": "el cramo",
+                    "banner_url": "",
+                    "avatar_url": "",
+                    "birthday": null,
+                    "description": ""
+                },
+                "following_count": 0,
+                "follower_count": 1,
+                "followers": [
+                    6
+                ],
+                "following": [
+                    6
+                ]
+            },
+            "post": {
+                "id": 16,
+                "content": "@sutikcram @sutikcram @sutikcram",
+                "type": "text",
+                "media": []
+            },
+            "notified": false
+        }
+    ]
+}
+```
+
+#### Update notification as viewed
+```
+GET /api/notifications/notified/
+Host: localhost:8000
+Content-Type: application/json
+Authorization: Bearer <access token>
+```
+```
+{
+    "user_mentioning": {
+        "id": 4,
+        "username": "qwer",
+        "email": "qwer@gmail.com",
+        "profile": {
+            "first_name": "qwer",
+            "last_name": "qwer",
+            "banner_url": "idjjsih8q3wennneyvpi",
+            "avatar_url": "euvuhkvjfsaubsz0i3ph",
+            "birthday": "1970-01-01T00:00:00Z",
+            "description": "soy una iguana"
+        },
+        "following_count": 0,
+        "follower_count": 0,
+        "followers": [],
+        "following": []
+    },
+    "user_mentioned": {
+        "id": 3,
+        "username": "sutikcram",
+        "email": "sutic2o@gmail.com",
+        "profile": {
+            "first_name": "sutico",
+            "last_name": "el cramo",
+            "banner_url": "",
+            "avatar_url": "",
+            "birthday": null,
+            "description": ""
+        },
+        "following_count": 0,
+        "follower_count": 1,
+        "followers": [
+            6
+        ],
+        "following": [
+            6
+        ]
+    },
+    "post": {
+        "id": 16,
+        "content": "@sutikcram @sutikcram @sutikcram",
+        "type": "text",
+        "media": []
+    },
+    "notified": true
+}
+```
+
+#### Get user's notifications
+```
+GET /api/users/notifications/
+Host: localhost:8000
+Content-Type: application/json
+Authorization: Bearer <access token>
+```
+
+```
+{
+    "count": 2,
+    "next": null,
+    "previous": null,
+    "results": [
+        {
+            "user_mentioning": {
+                "id": 4,
+                "username": "qwer",
+                "email": "qwer@gmail.com",
+                "profile": {
+                    "first_name": "qwer",
+                    "last_name": "qwer",
+                    "banner_url": "idjjsih8q3wennneyvpi",
+                    "avatar_url": "euvuhkvjfsaubsz0i3ph",
+                    "birthday": "1970-01-01T00:00:00Z",
+                    "description": "soy una iguana"
+                },
+                "following_count": 0,
+                "follower_count": 0,
+                "followers": [],
+                "following": []
+            },
+            "user_mentioned": {
+                "id": 3,
+                "username": "sutikcram",
+                "email": "sutic2o@gmail.com",
+                "profile": {
+                    "first_name": "sutico",
+                    "last_name": "el cramo",
+                    "banner_url": "",
+                    "avatar_url": "",
+                    "birthday": null,
+                    "description": ""
+                },
+                "following_count": 0,
+                "follower_count": 1,
+                "followers": [
+                    6
+                ],
+                "following": [
+                    6
+                ]
+            },
+            "post": {
+                "id": 15,
+                "content": "@sutikcram, eres un grande",
+                "type": "text",
+                "media": []
+            },
+            "notified": true
+        },
+        {
+            "user_mentioning": {
+                "id": 4,
+                "username": "qwer",
+                "email": "qwer@gmail.com",
+                "profile": {
+                    "first_name": "qwer",
+                    "last_name": "qwer",
+                    "banner_url": "idjjsih8q3wennneyvpi",
+                    "avatar_url": "euvuhkvjfsaubsz0i3ph",
+                    "birthday": "1970-01-01T00:00:00Z",
+                    "description": "soy una iguana"
+                },
+                "following_count": 0,
+                "follower_count": 0,
+                "followers": [],
+                "following": []
+            },
+            "user_mentioned": {
+                "id": 3,
+                "username": "sutikcram",
+                "email": "sutic2o@gmail.com",
+                "profile": {
+                    "first_name": "sutico",
+                    "last_name": "el cramo",
+                    "banner_url": "",
+                    "avatar_url": "",
+                    "birthday": null,
+                    "description": ""
+                },
+                "following_count": 0,
+                "follower_count": 1,
+                "followers": [
+                    6
+                ],
+                "following": [
+                    6
+                ]
+            },
+            "post": {
+                "id": 16,
+                "content": "@sutikcram @sutikcram @sutikcram",
+                "type": "text",
+                "media": []
+            },
+            "notified": true
+        }
+    ]
 }
 ```
