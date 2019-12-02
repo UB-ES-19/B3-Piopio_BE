@@ -60,7 +60,7 @@ class UserView(viewsets.ModelViewSet):
         serialized_users = serializers.UserDefaultSerializer(page, many=True)
         return self.get_paginated_response(serialized_users.data)
 
-    @action(methods=['POST'], detail=False, url_path="follow", permission_classes=(IsAuthenticated,), url_name="user_follow")
+    @action(methods=['POST'], detail=False, url_path="follow", permission_classes=(IsAuthenticated, permissions.IsUserNotBlockedData), url_name="user_follow")
     def follow(self, request):
         try:
             username = request.data.get('username')
@@ -85,7 +85,7 @@ class UserView(viewsets.ModelViewSet):
         except models.User.DoesNotExist:
             return Response({'username': 'The specified user does not exist'}, status.HTTP_404_NOT_FOUND)
 
-    @action(methods=['POST'], detail=False, url_path="unfollow", permission_classes=(IsAuthenticated,), url_name="user_unfollow")
+    @action(methods=['POST'], detail=False, url_path="unfollow", permission_classes=(IsAuthenticated, permissions.IsUserNotBlockedData), url_name="user_unfollow")
     def unfollow(self, request):
         try:
             username = request.data.get('username')
@@ -188,6 +188,46 @@ class UserView(viewsets.ModelViewSet):
         page = self.paginate_queryset(user_notifications)
         serialized_users = serializers.NotificationsSerializer(page, many=True)
         return self.get_paginated_response(serialized_users.data)
+
+    @action(methods=['POST'], detail=False, url_path="(?P<user_pk>[^/.]+)/block", permission_classes=(IsAuthenticated,),
+            url_name="user_block")
+    def block(self, request, user_pk):
+        try:
+            user_to_block = models.User.objects.get(pk=user_pk)
+
+            if user_to_block in request.user.blocked_users.all():
+                return Response({'message': "User already blocked"})
+
+            request.user.blocked_users.add(user_to_block)
+
+            # Remove following if exists
+            if user_to_block in request.user.followings.all():
+                request.user.followings.remove(user_to_block)
+                user_to_block.followers.remove(request.user)
+
+            # Remove follow if exists
+            if user_to_block in request.user.followers.all():
+                request.user.followers.remove(user_to_block)
+                user_to_block.followings.remove(request.user)
+
+            return Response({'message': "User blocked"})
+        except models.User.DoesNotExist:
+            return Response({'message': "Specified user could not be found"}, status.HTTP_404_NOT_FOUND)
+
+    @action(methods=['POST'], detail=False, url_path="(?P<user_pk>[^/.]+)/unblock", permission_classes=(IsAuthenticated,),
+            url_name="user_unblock")
+    def unblock(self, request, user_pk):
+        try:
+            user_to_block = models.User.objects.get(pk=user_pk)
+
+            if user_to_block not in request.user.blocked_users.all():
+                return Response({'message': "User is not blocked"})
+
+            request.user.blocked_users.remove(user_to_block)
+
+            return Response({'message': "User unblocked"})
+        except models.User.DoesNotExist:
+            return Response({'message': "Specified user could not be found"}, status.HTTP_404_NOT_FOUND)
 
 
 def add_likes_and_retweets(posts, user, sort=True):

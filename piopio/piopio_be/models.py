@@ -36,6 +36,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     following_count = models.IntegerField(default=0)
     follower_count = models.IntegerField(default=0)
 
+    # Blocked users
+    blocked_users = models.ManyToManyField('self', related_name='blocked')
+
     REQUIRED_FIELDS = ['email', 'password']
     USERNAME_FIELD = 'username'
 

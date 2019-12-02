@@ -53,7 +53,8 @@ class UserDefaultSerializer(WritableNestedModelSerializer):
             "following_count",
             "follower_count",
             "followers",
-            "following"
+            "following",
+            "blocked_users"
         ]
 
 
