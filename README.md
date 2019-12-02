@@ -1530,10 +1530,13 @@ Authorization: Bearer <access token>
 
 #### Update notification as viewed
 ```
-GET /api/notifications/notified/
+POST /api/notifications/notified/
 Host: localhost:8000
 Content-Type: application/json
 Authorization: Bearer <access token>
+{
+    "post":18
+}
 ```
 ```
 {
@@ -1566,18 +1569,14 @@ Authorization: Bearer <access token>
             "birthday": null,
             "description": ""
         },
-        "following_count": 0,
+        "following_count": 1,
         "follower_count": 1,
-        "followers": [
-            6
-        ],
-        "following": [
-            6
-        ]
+        "followers": [],
+        "following": []
     },
     "post": {
-        "id": 16,
-        "content": "@sutikcram @sutikcram @sutikcram",
+        "id": 18,
+        "content": "@sutikcram eres mongui",
         "type": "text",
         "media": []
     },
