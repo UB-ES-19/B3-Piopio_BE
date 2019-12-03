@@ -178,13 +178,19 @@ class UserView(viewsets.ModelViewSet):
             print(_user)
             related.append(_user['id'])
 
-        #user = request.user
         related.append(userpk)
         posts = models.Post.objects.filter(
             user_id__in=related).order_by('-created_at')
         posts = add_likes_and_retweets(posts, userpk)
 
-        page = self.paginate_queryset(posts)
+        """
+        Filter the results with user's report list
+        """
+        user = self.queryset.get(pk=request.user.pk)
+        reported = user.reported.all().values_list('id')
+        filtered = posts.all().exclude(id__in=reported)
+
+        page = self.paginate_queryset(filtered)
         serialized_posts = serializers.PostSerializerWLikedRetweet(
             page, many=True)
         return self.get_paginated_response(serialized_posts.data)
@@ -196,6 +202,19 @@ class UserView(viewsets.ModelViewSet):
         page = self.paginate_queryset(user_notifications)
         serialized_users = serializers.NotificationsSerializer(page, many=True)
         return self.get_paginated_response(serialized_users.data)
+
+    @action(methods=['POST'], detail=False, url_path="report/(?P<postpk>[^/.]+)", permission_classes=(IsAuthenticated,), url_name="user_report")
+    def report(self, request, postpk):
+        try:
+            user = self.queryset.get(pk=request.user.pk)
+            post = get_object_or_404(models.Post, pk=postpk)
+            user.reported.add(post.id)
+            return Response({'message':'reported!'}, status=status.HTTP_201_CREATED)
+        except ValueError:
+            return Response({'message': 'Something went wrong!'}, status.HTTP_404_NOT_FOUND)
+        except models.User.DoesNotExist:
+            return Response({'message': 'Something went wrong!'}, status.HTTP_404_NOT_FOUND)
+        
 
 
 def add_likes_and_retweets(posts, user, sort=True):
@@ -323,9 +342,15 @@ class PostView(viewsets.ModelViewSet):
             contents = content.split(" ")
             posts_queryset = self.queryset
 
+            """
+            Filter the results with user's report list
+            """
+            user = self.queryset.get(pk=request.user.pk)
+            reported = user.reported.all().values_list('id')
+
             for content in contents:
                 posts_queryset = posts_queryset.filter(
-                    content__icontains=content)
+                    content__icontains=content).exclude(id__in=reported) #Search result excluded reported post
 
         except ValueError:
             return Response({'content': 'Not specified'}, status.HTTP_404_NOT_FOUND)
@@ -343,6 +368,7 @@ class PostView(viewsets.ModelViewSet):
             parent = post.get().parent.all()
             child = self.get_queryset().filter(parent__id__exact=postpk)
             detail = list(chain(parent, post, child))
+
             page = self.paginate_queryset(detail)
             serialized_posts = self.get_serializer_parent(page, many=True)
             return self.get_paginated_response(serialized_posts.data)
