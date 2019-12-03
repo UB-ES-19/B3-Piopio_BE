@@ -888,7 +888,7 @@ Response
         }
     ]
 }
-
+```
 #### Get Post by ID:
 ```
 GET /api/posts/<post_id>
