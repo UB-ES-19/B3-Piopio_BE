@@ -2,8 +2,6 @@ from rest_framework import generics, status, views, viewsets, mixins
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
-from django.http import JsonResponse
-from itertools import chain
 
 from piopio_be import serializers, models, permissions
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -367,9 +365,9 @@ class PostView(viewsets.ModelViewSet):
             post = self.get_queryset().filter(id=postpk)
             parent = post.get().parent.all()
             child = self.get_queryset().filter(parent__id__exact=postpk)
-            detail = list(chain(parent, post, child))
+            rslt = parent.union(post,child)
 
-            page = self.paginate_queryset(detail)
+            page = self.paginate_queryset(rslt)
             serialized_posts = self.get_serializer_parent(page, many=True)
             return self.get_paginated_response(serialized_posts.data)
 
@@ -392,7 +390,7 @@ class PostView(viewsets.ModelViewSet):
 
         except ValueError:
             return Response({'message': 'Something went wrong!'}, status.HTTP_404_NOT_FOUND)
-        except models.User.DoesNotExist:
+        except models.Post.DoesNotExist:
             return Response({'message': 'Something went wrong!'}, status.HTTP_404_NOT_FOUND)
 
 
