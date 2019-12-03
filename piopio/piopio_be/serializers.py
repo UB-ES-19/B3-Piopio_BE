@@ -129,6 +129,14 @@ class PostSerializerWithUser(serializers.ModelSerializer):
         fields = ('id', 'content', 'type', 'media', 'user', 'created_at', 'favorited_count', 'retweeted_count', 'mentions')
         model = Post
 
+class PostSerializerWithParent(serializers.ModelSerializer):
+    user = UserDefaultSerializer(read_only=True)
+    media = MediaSerializer(read_only=True, source="media_set", many=True)
+    mentions = EachUserSerializer(many=True, read_only=True)
+
+    class Meta:
+        fields = ('id', 'content', 'type', 'media', 'user', 'created_at', 'favorited_count', 'retweeted_count', 'mentions','parent')
+        model = Post
 
 class PostSerializerWLikedRetweet(serializers.ModelSerializer):
     liked = serializers.CharField()

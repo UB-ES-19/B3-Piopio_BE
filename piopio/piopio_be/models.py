@@ -64,7 +64,7 @@ class Post(models.Model):
     created_at = models.DateTimeField(db_index=True, auto_now_add=True)
     user = models.ForeignKey(User, related_name="post_author", on_delete=models.CASCADE)
     type = models.CharField(max_length=10)
-
+    parent = models.ManyToManyField('self',related_name="child",symmetrical = False)
     # Likes and retweets
     likes = models.ManyToManyField(User, related_name="post_likes", through='LikedTable')
     retweets = models.ManyToManyField(User, related_name="post_retweets", through='RetweetedTable')
@@ -82,6 +82,16 @@ class Post(models.Model):
         users_ids = Notification.objects.filter(post=self).values_list('user_mentioned', flat=True)
         return User.objects.filter(id__in=users_ids)
 
+    def serializeCustom(self):
+        data = { 
+            "author": self.user,
+            "created_at": self.created_at,
+            "content": self.content,
+            "favorited_count": self.favorited_count,
+            "retweeted_count": self.retweeted_count,
+            "parent": self.parent,
+        }
+        return data
 class Media(models.Model):
     url = models.CharField(max_length=200)
     created_at = models.DateTimeField(auto_now_add=True)
