@@ -15,6 +15,7 @@ router.register(r'posts', views.PostView, basename='posts')
 router.register(r'follows', views.UserFollowerView, basename='follower')
 router.register(r'followings', views.UserFollwoingView, basename='following')
 router.register(r'notifications', views.NotificationsView, basename='notifications')
+router.register(r'trendingtopic', views.TrendingTopicView, basename='trendingtopic')
 
 users_router = routers.NestedSimpleRouter(router, r'users', lookup='user')
 users_router.register(r'posts', views.PostsFromUserView)

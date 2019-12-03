@@ -1695,3 +1695,24 @@ Authorization: Bearer <access token>
     ]
 }
 ```
+
+#### Get Trending topics
+```
+GET /api/trendingtopic
+Host: localhost:8000
+Content-Type: application/json
+```
+Response
+```
+[
+    {
+        "hashtag": "trending",
+        "count": 2
+    },
+    {
+        "hashtag": "topic",
+        "count": 2
+    },
+    ...
+]
+```
