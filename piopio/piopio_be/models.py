@@ -62,6 +62,25 @@ class Profile(models.Model):
         return str(self.first_name) + " " + str(self.last_name)
 
 
+class PostManager(models.Manager):
+    """
+    Custom manager for posts to allow filter blocked users.
+    """
+    def get_queryset(self):
+        return ManagerQuerySet(self.model, using=self._db)
+
+class ManagerQuerySet(models.QuerySet):
+    """
+    Custom QuerySet for posts to allow filter blocked users.
+    """
+
+    def filter_blocked(self, user):
+        blocked_users_id = User.blocked_users.through.objects.filter(from_user=user).values_list('to_user_id',flat=True)
+        blocked_users_id2 = User.blocked_users.through.objects.filter(to_user=user).values_list('from_user_id',flat=True)
+
+        return self.exclude(user_id__in=blocked_users_id).exclude(user_id__in=blocked_users_id2)
+
+
 class Post(models.Model):
     content = models.TextField()
     created_at = models.DateTimeField(db_index=True, auto_now_add=True)
@@ -74,6 +93,8 @@ class Post(models.Model):
     favorited_count = models.IntegerField(default=0)
     retweeted_count = models.IntegerField(default=0)
 
+    objects = PostManager()
+
     def __str__(self):
         return self.content
 
@@ -84,6 +105,7 @@ class Post(models.Model):
     def mentions(self):
         users_ids = Notification.objects.filter(post=self).values_list('user_mentioned', flat=True)
         return User.objects.filter(id__in=users_ids)
+
 
 class Media(models.Model):
     url = models.CharField(max_length=200)
@@ -134,6 +156,8 @@ def post_post_save(sender, instance, **kwargs):
     matches += re.findall(MENTION_REGEX4, content)
 
     users_notified = []
+    blocked_users = instance.user.blocked_users.all().values_list('id', flat=True)
+
     for match in matches:
         user = re.findall(r'[a-zA-Z0-9-_]+', match)
 
@@ -144,7 +168,7 @@ def post_post_save(sender, instance, **kwargs):
             user_search = User.objects.filter(username=user)
             if user_search.exists():
                 user_search = user_search.first()
-                if user_search.id not in users_notified:
+                if user_search.id not in users_notified and user_search.id not in blocked_users:
                     Notification.objects.create(user_mentioning=instance.user, user_mentioned=user_search, post=instance)
                     users_notified.append(user_search.id)
 
