@@ -164,12 +164,17 @@ class UserView(viewsets.ModelViewSet):
         posts = models.Post.objects.filter(id__in=posts_liked)
         if request.user:
             posts = posts.filter_blocked(request.user)
-        # TODO: sort by liked date
+            # TODO: sort by liked date
 
-        posts = add_likes_and_retweets(posts, user)
+            posts = add_likes_and_retweets(posts, user)
+
         page = self.paginate_queryset(posts)
-        serialized_posts = serializers.PostSerializerWLikedRetweet(
-            page, many=True)
+        if request.user:
+            serialized_posts = serializers.PostSerializerWLikedRetweetMentions(
+                page, many=True)
+        else:
+            serialized_posts = serializers.PostSerializerWLikedRetweet(
+                page, many=True)
         return self.get_paginated_response(serialized_posts.data)
 
     @action(methods=['GET'], detail=False, url_path="(?P<userpk>[^/.]+)/retweeted", url_name="user_retweeted")
@@ -182,12 +187,17 @@ class UserView(viewsets.ModelViewSet):
         posts = models.Post.objects.filter(id__in=posts_retweeted)
         if request.user:
             posts = posts.filter_blocked(request.user)
-        # TODO: sort by retweeted date
+            # TODO: sort by retweeted date
 
-        posts = add_likes_and_retweets(posts, user)
+            posts = add_likes_and_retweets(posts, user)
+
         page = self.paginate_queryset(posts)
-        serialized_posts = serializers.PostSerializerWLikedRetweet(
-            page, many=True)
+        if request.user:
+            serialized_posts = serializers.PostSerializerWLikedRetweetMentions(
+                page, many=True)
+        else:
+            serialized_posts = serializers.PostSerializerWLikedRetweet(
+                page, many=True)
         return self.get_paginated_response(serialized_posts.data)
 
     @action(methods=['GET'], detail=False, permission_classes=(IsAuthenticated,),
@@ -214,7 +224,7 @@ class UserView(viewsets.ModelViewSet):
         filtered = posts.all().exclude(id__in=reported)
 
         page = self.paginate_queryset(filtered)
-        serialized_posts = serializers.PostSerializerWithUser(
+        serialized_posts = serializers.PostSerializerWLikedRetweetMentions(
             page, many=True)
         return self.get_paginated_response(serialized_posts.data)
 
@@ -346,20 +356,31 @@ class PostsFromUserView(viewsets.ReadOnlyModelViewSet):
             rets = rets.filter_blocked(request.user)
         posts = sort_posts_and_retweets(posts, rets, ids, user_pk)
 
-        posts = add_likes_and_retweets(posts, request.user, sort=False)
+        if request.user:
+            posts = add_likes_and_retweets(posts, request.user, sort=False)
 
         page = self.paginate_queryset(posts)
-        serialized_posts = serializers.PostSerializerWithUser(
-            page, many=True)
+
+        if request.user:
+            serialized_posts = serializers.PostSerializerWLikedRetweetMentions(
+                page, many=True)
+        else:
+            serialized_posts = serializers.PostSerializerWithUser(
+                page, many=True)
         return self.get_paginated_response(serialized_posts.data)
 
     def retrieve(self, request, pk=None, user_pk=None, *args, **kwargs):
         posts = self.get_queryset()
         if request.user:
             posts = posts.filter_blocked(request.user)
+            posts = add_likes_and_retweets(posts, request.user, sort=False)
+
         try:
             posts = posts.get(pk=pk)
-            serialized_posts = serializers.PostSerializerWithUser(posts)
+            if request.user:
+                serialized_posts = serializers.PostSerializerWLikedRetweetMentions(posts)
+            else:
+                serialized_posts = serializers.PostSerializerWithUser(posts)
             return Response(serialized_posts.data)
         except models.Post.DoesNotExist:
             return Response({"message": "Post not found"}, status.HTTP_404_NOT_FOUND)
@@ -376,6 +397,36 @@ class PostView(viewsets.ModelViewSet):
     has_object_permissions = {
         permissions.IsPostOwner: ['update', 'partial_update', 'destroy'],
     }
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        if request.user:
+            queryset = add_likes_and_retweets(queryset, request.user, sort=False)
+            queryset = queryset.filter_blocked(request.user)
+
+        page = self.paginate_queryset(queryset)
+
+        if request.user:
+            serializer = serializers.PostSerializerWLikedRetweetMentions(queryset, many=True)
+        else:
+            serializer = self.get_serializer(queryset, many=True)
+        return self.get_paginated_response(serializer.data)
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = models.Post.objects.filter(pk=kwargs['pk'])
+        if request.user:
+            queryset = add_likes_and_retweets(instance, request.user, sort=False)
+            queryset = queryset.filter_blocked(request.user)
+
+        queryset = queryset.first()
+
+        if request.user:
+            serializer = serializers.PostSerializerWLikedRetweetMentions(queryset)
+        else:
+            serializer = self.get_serializer(queryset)
+
+        return Response(serializer.data)
 
     def get_serializer_class(self):
         if self.action == 'create' or self.action == 'update':
@@ -423,7 +474,7 @@ class PostView(viewsets.ModelViewSet):
 
         posts = add_likes_and_retweets(posts, user)
         page = self.paginate_queryset(posts)
-        serialized_posts = serializers.PostSerializerWLikedRetweet(
+        serialized_posts = serializers.PostSerializerWLikedRetweetMentions(
             page, many=True)
         return self.get_paginated_response(serialized_posts.data)
 
@@ -447,10 +498,16 @@ class PostView(viewsets.ModelViewSet):
         except ValueError:
             return Response({'content': 'Not specified'}, status.HTTP_404_NOT_FOUND)
 
-        posts_queryset = add_likes_and_retweets(posts_queryset, request.user)
+        if request.user:
+            posts_queryset = add_likes_and_retweets(posts_queryset, request.user)
         page = self.paginate_queryset(posts_queryset)
-        serialized_posts = serializers.PostSerializerWLikedRetweet(
-            page, many=True)
+
+        if request.user:
+            serialized_posts = serializers.PostSerializerWLikedRetweetMentions(
+                page, many=True)
+        else:
+            serialized_posts = serializers.PostSerializerWLikedRetweet(
+                page, many=True)
         return self.get_paginated_response(serialized_posts.data)
 
     @action(methods=['GET'], detail=False, url_path="details/(?P<postpk>[^/.]+)", url_name="detail_post")
