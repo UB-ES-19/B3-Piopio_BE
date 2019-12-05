@@ -60,7 +60,8 @@ class UserDefaultSerializer(WritableNestedModelSerializer):
 class UserBlockedSerializers(WritableNestedModelSerializer):
 
     profile = UserProfileSerializer(required=True)
-    blocked = serializers.BooleanField()
+    user_blocked = serializers.BooleanField()
+    other_blocked = serializers.BooleanField()
 
     class Meta:
         model = User
@@ -74,7 +75,8 @@ class UserBlockedSerializers(WritableNestedModelSerializer):
             "followers",
             "following",
             "blocked_users",
-            "blocked"
+            "user_blocked",
+            "other_blocked"
         ]
 
 class UserCreateSerializer(serializers.ModelSerializer):

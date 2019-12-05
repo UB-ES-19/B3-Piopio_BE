@@ -59,8 +59,8 @@ class UserView(viewsets.ModelViewSet):
             return Response({'detail': 'User Not Found'}, status.HTTP_404_NOT_FOUND)
 
         if request.user:
-            q.blocked=(models.User.blocked_users.through.objects.filter(to_user__id=kwargs['pk']).filter(from_user=request.user) |
-                                    models.User.blocked_users.through.objects.filter(to_user=request.user).filter(from_user__id=kwargs['pk'])).exists()
+            q.user_blocked=(models.User.blocked_users.through.objects.filter(to_user__id=kwargs['pk']).filter(from_user=request.user)).exists()
+            q.other_blocked=(models.User.blocked_users.through.objects.filter(to_user=request.user).filter(from_user__id=kwargs['pk'])).exists()
 
         s = serializers.UserBlockedSerializers(q)
         return Response(s.data)
@@ -214,7 +214,7 @@ class UserView(viewsets.ModelViewSet):
         filtered = posts.all().exclude(id__in=reported)
 
         page = self.paginate_queryset(filtered)
-        serialized_posts = serializers.PostSerializerWLikedRetweet(
+        serialized_posts = serializers.PostSerializerWithUser(
             page, many=True)
         return self.get_paginated_response(serialized_posts.data)
 
@@ -349,7 +349,7 @@ class PostsFromUserView(viewsets.ReadOnlyModelViewSet):
         posts = add_likes_and_retweets(posts, request.user, sort=False)
 
         page = self.paginate_queryset(posts)
-        serialized_posts = serializers.PostSerializerWLikedRetweet(
+        serialized_posts = serializers.PostSerializerWithUser(
             page, many=True)
         return self.get_paginated_response(serialized_posts.data)
 
