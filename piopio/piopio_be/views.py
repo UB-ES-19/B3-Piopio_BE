@@ -365,11 +365,17 @@ class PostView(viewsets.ModelViewSet):
             post = self.get_queryset().filter(id=postpk)
             parent = post.get().parent.all()
             child = self.get_queryset().filter(parent__id__exact=postpk)
-            rslt = parent.union(post,child)
-
-            page = self.paginate_queryset(rslt)
-            serialized_posts = self.get_serializer_parent(page, many=True)
-            return self.get_paginated_response(serialized_posts.data)
+            parent_rslt = self.get_serializer(parent.get()).data
+            post_rslt = self.get_serializer(post.get()).data
+            child_rslt = [self.get_serializer(_child).data for _child in child]
+            data = {
+                "Details": {
+                    "parent": parent_rslt,
+                    "post": post_rslt,
+                    "childs": child_rslt
+                }
+            }
+            return Response(data)
 
         except ValueError:
             return Response({'message': 'Something went wrong!'}, status.HTTP_404_NOT_FOUND)
