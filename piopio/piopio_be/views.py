@@ -603,6 +603,8 @@ class TrendingTopicView(viewsets.GenericViewSet, mixins.ListModelMixin):
     serializer_class = serializers.TrendingTopicSerializer
 
     def list(self, request, *args, **kwargs):
-        queryset = models.TrendingTopic.objects.filter(created_at__gte=timezone.now().date())[:10]
+        today = timezone.now().date()
+        yesterday = today - datetime.timedelta(days=1)
+        queryset = models.TrendingTopic.objects.filter(created_at__gte=yesterday).order_by('-count')[:10]
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
