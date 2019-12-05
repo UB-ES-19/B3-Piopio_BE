@@ -665,7 +665,8 @@ Content-Type: application/json
     "blocked_users": [
         3
     ],
-    "blocked": true
+    "user_blocked": true,
+    "other_blocked": false
 }
 ```
 ```
