@@ -373,7 +373,7 @@ class PostView(viewsets.ModelViewSet):
                 child_rslt = [self.get_serializer(_child).data for _child in child]
             post_rslt = self.get_serializer(post.get()).data
             data = {
-                "Details": {
+                "details": {
                     "parent": parent_rslt,
                     "post": post_rslt,
                     "childs": child_rslt
