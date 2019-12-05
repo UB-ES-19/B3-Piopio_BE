@@ -881,11 +881,8 @@ Content-Type: application/json
 Response
 ```
 {
-    "count": 5,
-    "next": null,
-    "previous": null,
-    "results": [
-        {
+    "Details": {
+        "parent": {
             "id": 42,
             "content": "replyto 29",
             "type": "<text>",
@@ -910,10 +907,9 @@ Response
             "created_at": "2019-12-03T13:17:36.077154Z",
             "favorited_count": 0,
             "retweeted_count": 0,
-            "mentions": [],
-            "parent": []
+            "mentions": []
         },
-        {
+        "post": {
             "id": 48,
             "content": "replyto 29",
             "type": "<text>",
@@ -938,102 +934,92 @@ Response
             "created_at": "2019-12-03T13:20:30.767622Z",
             "favorited_count": 0,
             "retweeted_count": 0,
-            "mentions": [],
-            "parent": [
-                42
-            ]
+            "mentions": []
         },
-        {
-            "id": 51,
-            "content": "replyto 29",
-            "type": "<text>",
-            "media": [],
-            "user": {
-                "id": 1,
-                "username": "onebu",
-                "email": "onebu@gmail.com",
-                "profile": {
-                    "first_name": "user",
-                    "last_name": "user",
-                    "banner_url": "",
-                    "avatar_url": "",
-                    "birthday": null,
-                    "description": ""
+        "childs": [
+            {
+                "id": 53,
+                "content": "replyto 29",
+                "type": "<text>",
+                "media": [],
+                "user": {
+                    "id": 1,
+                    "username": "onebu",
+                    "email": "onebu@gmail.com",
+                    "profile": {
+                        "first_name": "user",
+                        "last_name": "user",
+                        "banner_url": "",
+                        "avatar_url": "",
+                        "birthday": null,
+                        "description": ""
+                    },
+                    "following_count": 0,
+                    "follower_count": 0,
+                    "followers": [],
+                    "following": []
                 },
-                "following_count": 0,
-                "follower_count": 0,
-                "followers": [],
-                "following": []
+                "created_at": "2019-12-03T19:11:03.802036Z",
+                "favorited_count": 0,
+                "retweeted_count": 0,
+                "mentions": []
             },
-            "created_at": "2019-12-03T14:02:23.310217Z",
-            "favorited_count": 0,
-            "retweeted_count": 0,
-            "mentions": [],
-            "parent": [
-                48
-            ]
-        },
-        {
-            "id": 52,
-            "content": "replyto 29",
-            "type": "<text>",
-            "media": [],
-            "user": {
-                "id": 1,
-                "username": "onebu",
-                "email": "onebu@gmail.com",
-                "profile": {
-                    "first_name": "user",
-                    "last_name": "user",
-                    "banner_url": "",
-                    "avatar_url": "",
-                    "birthday": null,
-                    "description": ""
+            {
+                "id": 52,
+                "content": "replyto 29",
+                "type": "<text>",
+                "media": [],
+                "user": {
+                    "id": 1,
+                    "username": "onebu",
+                    "email": "onebu@gmail.com",
+                    "profile": {
+                        "first_name": "user",
+                        "last_name": "user",
+                        "banner_url": "",
+                        "avatar_url": "",
+                        "birthday": null,
+                        "description": ""
+                    },
+                    "following_count": 0,
+                    "follower_count": 0,
+                    "followers": [],
+                    "following": []
                 },
-                "following_count": 0,
-                "follower_count": 0,
-                "followers": [],
-                "following": []
+                "created_at": "2019-12-03T14:11:27.064334Z",
+                "favorited_count": 0,
+                "retweeted_count": 0,
+                "mentions": []
             },
-            "created_at": "2019-12-03T14:11:27.064334Z",
-            "favorited_count": 0,
-            "retweeted_count": 0,
-            "mentions": [],
-            "parent": [
-                48
-            ]
-        },
-        {
-            "id": 53,
-            "content": "replyto 29",
-            "type": "<text>",
-            "media": [],
-            "user": {
-                "id": 1,
-                "username": "onebu",
-                "email": "onebu@gmail.com",
-                "profile": {
-                    "first_name": "user",
-                    "last_name": "user",
-                    "banner_url": "",
-                    "avatar_url": "",
-                    "birthday": null,
-                    "description": ""
+            {
+                "id": 51,
+                "content": "replyto 29",
+                "type": "<text>",
+                "media": [],
+                "user": {
+                    "id": 1,
+                    "username": "onebu",
+                    "email": "onebu@gmail.com",
+                    "profile": {
+                        "first_name": "user",
+                        "last_name": "user",
+                        "banner_url": "",
+                        "avatar_url": "",
+                        "birthday": null,
+                        "description": ""
+                    },
+                    "following_count": 0,
+                    "follower_count": 0,
+                    "followers": [],
+                    "following": []
                 },
-                "following_count": 0,
-                "follower_count": 0,
-                "followers": [],
-                "following": []
-            },
-            "created_at": "2019-12-03T19:11:03.802036Z",
-            "favorited_count": 0,
-            "retweeted_count": 0,
-            "mentions": [],
-            "parent": [
-                48
-            ]
-        }
-    ]
+                "created_at": "2019-12-03T14:02:23.310217Z",
+                "favorited_count": 0,
+                "retweeted_count": 0,
+                "mentions": []
+            }
+        ]
+    }
 }
 ```
 #### Get All Posts (with pagination):
