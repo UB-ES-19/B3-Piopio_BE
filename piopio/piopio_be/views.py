@@ -2,7 +2,8 @@ from rest_framework import generics, status, views, viewsets, mixins
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
-
+import datetime
+from django.utils import timezone
 from piopio_be import serializers, models, permissions
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.shortcuts import get_list_or_404, get_object_or_404
@@ -503,3 +504,13 @@ class NotificationsView(viewsets.GenericViewSet,
         serialized_notification = self.get_serializer(notification)
 
         return Response(serialized_notification.data)
+
+class TrendingTopicView(viewsets.GenericViewSet, mixins.ListModelMixin):
+
+    queryset = models.TrendingTopic.objects.all()
+    serializer_class = serializers.TrendingTopicSerializer
+
+    def list(self, request, *args, **kwargs):
+        queryset = models.TrendingTopic.objects.filter(created_at__gte=timezone.now().date())[:10]
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)

@@ -1,3 +1,4 @@
+from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
 from django.core.validators import RegexValidator
 from django.db import models
@@ -130,6 +131,12 @@ class Notification(models.Model):
     notified = models.BooleanField(default=False)
 
 
+class TrendingTopic(models.Model):
+    hashtag = models.CharField(max_length=200)
+    count = models.IntegerField(default=0)
+    created_at = models.DateTimeField(db_index=True, auto_now_add=False)
+
+
 @receiver(post_save, sender=Post)
 def post_post_save(sender, instance, **kwargs):
     """
@@ -140,6 +147,17 @@ def post_post_save(sender, instance, **kwargs):
     matches += re.findall(MENTION_REGEX2, content)
     matches += re.findall(MENTION_REGEX3, content)
     matches += re.findall(MENTION_REGEX4, content)
+
+    HASHTAG_REGEX = r'#(\w+)\b'
+    hashtag_matches = re.findall(HASHTAG_REGEX, content)
+
+    for hashtag in hashtag_matches:
+        try:
+            ref = TrendingTopic.objects.get(hashtag=hashtag)
+            ref.count += 1
+            ref.save()
+        except ObjectDoesNotExist:
+            TrendingTopic.objects.create(hashtag=hashtag, count=1, created_at=timezone.now())
 
     users_notified = []
     for match in matches:

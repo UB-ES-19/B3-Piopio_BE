@@ -1,7 +1,7 @@
 # API serializers
 from drf_writable_nested import WritableNestedModelSerializer
 from rest_framework import serializers, exceptions
-from piopio_be.models import User, Profile, Post, Media, Notification
+from piopio_be.models import User, Profile, Post, Media, Notification, TrendingTopic
 from django.contrib.auth.password_validation import validate_password
 from django.core import exceptions
 
@@ -191,3 +191,10 @@ class NotificationsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Notification
         fields = ('user_mentioning', 'user_mentioned', 'post', 'notified')
+
+
+class TrendingTopicSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = TrendingTopic
+        fields = ('hashtag', 'count',)
