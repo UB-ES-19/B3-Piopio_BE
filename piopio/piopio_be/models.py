@@ -38,6 +38,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     following_count = models.IntegerField(default=0)
     follower_count = models.IntegerField(default=0)
 
+    # Blocked users
+    blocked_users = models.ManyToManyField('self', related_name='blocked')
+
     REQUIRED_FIELDS = ['email', 'password']
     USERNAME_FIELD = 'username'
 
@@ -61,6 +64,25 @@ class Profile(models.Model):
         return str(self.first_name) + " " + str(self.last_name)
 
 
+class PostManager(models.Manager):
+    """
+    Custom manager for posts to allow filter blocked users.
+    """
+    def get_queryset(self):
+        return ManagerQuerySet(self.model, using=self._db)
+
+class ManagerQuerySet(models.QuerySet):
+    """
+    Custom QuerySet for posts to allow filter blocked users.
+    """
+
+    def filter_blocked(self, user):
+        blocked_users_id = User.blocked_users.through.objects.filter(from_user=user).values_list('to_user_id',flat=True)
+        blocked_users_id2 = User.blocked_users.through.objects.filter(to_user=user).values_list('from_user_id',flat=True)
+
+        return self.exclude(user_id__in=blocked_users_id).exclude(user_id__in=blocked_users_id2)
+
+
 class Post(models.Model):
     content = models.TextField()
     created_at = models.DateTimeField(db_index=True, auto_now_add=True)
@@ -72,6 +94,8 @@ class Post(models.Model):
     retweets = models.ManyToManyField(User, related_name="post_retweets", through='RetweetedTable')
     favorited_count = models.IntegerField(default=0)
     retweeted_count = models.IntegerField(default=0)
+
+    objects = PostManager()
 
     def __str__(self):
         return self.content
@@ -94,6 +118,8 @@ class Post(models.Model):
             "parent": self.parent,
         }
         return data
+
+
 class Media(models.Model):
     url = models.CharField(max_length=200)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -160,6 +186,8 @@ def post_post_save(sender, instance, **kwargs):
             TrendingTopic.objects.create(hashtag=hashtag, count=1, created_at=timezone.now())
 
     users_notified = []
+    blocked_users = instance.user.blocked_users.all().values_list('id', flat=True)
+
     for match in matches:
         user = re.findall(r'[a-zA-Z0-9-_]+', match)
 
@@ -170,7 +198,7 @@ def post_post_save(sender, instance, **kwargs):
             user_search = User.objects.filter(username=user)
             if user_search.exists():
                 user_search = user_search.first()
-                if user_search.id not in users_notified:
+                if user_search.id not in users_notified and user_search.id not in blocked_users:
                     Notification.objects.create(user_mentioning=instance.user, user_mentioned=user_search, post=instance)
                     users_notified.append(user_search.id)
 

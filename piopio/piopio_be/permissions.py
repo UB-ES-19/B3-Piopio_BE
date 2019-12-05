@@ -42,3 +42,19 @@ class IsPostOwner(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         return obj.user == request.user
+
+
+class IsUserNotBlocked(permissions.BasePermission):
+
+    message = 'This user is blocked'
+
+    def has_object_permission(self, request, view, obj):
+        return obj not in request.user.blocked_users
+
+
+class IsUserNotBlockedData(permissions.BasePermission):
+
+    message = 'This user is blocked'
+
+    def has_object_permission(self, request, view, obj):
+        return obj.data.get('username') not in request.user.blocked_users.values_list('username', flat=True)

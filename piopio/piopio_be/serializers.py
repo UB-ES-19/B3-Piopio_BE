@@ -53,9 +53,29 @@ class UserDefaultSerializer(WritableNestedModelSerializer):
             "following_count",
             "follower_count",
             "followers",
-            "following"
+            "following",
+            "blocked_users"
         ]
 
+class UserBlockedSerializers(WritableNestedModelSerializer):
+
+    profile = UserProfileSerializer(required=True)
+    blocked = serializers.BooleanField()
+
+    class Meta:
+        model = User
+        fields = [
+            "id",
+            "username",
+            "email",
+            "profile",
+            "following_count",
+            "follower_count",
+            "followers",
+            "following",
+            "blocked_users",
+            "blocked"
+        ]
 
 class UserCreateSerializer(serializers.ModelSerializer):
 

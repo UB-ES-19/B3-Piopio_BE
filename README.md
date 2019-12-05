@@ -647,13 +647,25 @@ Status: 200 OK
 Content-Type: application/json
 
 {
-    "id": 2,
-    "username": "test",
-    "email": "test@test.com",
+    "id": 5,
+    "username": "asdf",
+    "email": "asdf@gmail.com",
     "profile": {
-        "first_name": "test",
-        "last_name": "test"
-    }
+        "first_name": "asdf",
+        "last_name": "asdf",
+        "banner_url": "",
+        "avatar_url": "",
+        "birthday": null,
+        "description": ""
+    },
+    "following_count": 0,
+    "follower_count": 0,
+    "followers": [],
+    "following": [],
+    "blocked_users": [
+        3
+    ],
+    "blocked": true
 }
 ```
 ```
@@ -1808,6 +1820,50 @@ Authorization: Bearer <access token>
 }
 ```
 
+## Block user
+```
+POST /api/users/<user_id>/block/
+Host: localhost:8000
+Content-Type: application/json
+Authorization: Bearer <access token>
+```
+Response:
+```
+200 OK
+{
+    "message": "User blocked"
+}
+```
+```
+404 Not Found
+{
+    "message": "Specified user could not be found"
+}
+```
+
+## Unblock user
+```
+POST /api/users/<user_id>/unblock/
+Host: localhost:8000
+Content-Type: application/json
+Authorization: Bearer <access token>
+```
+Response:
+```
+200 OK
+{
+    "message": "User unblocked"
+}
+```
+```
+404 Not Found
+{
+    "message": "Specified user could not be found"
+}
+```
+
+## 
+=======
 #### Get Trending topics
 ```
 GET /api/trendingtopic
@@ -1828,3 +1884,4 @@ Response
     ...
 ]
 ```
+
