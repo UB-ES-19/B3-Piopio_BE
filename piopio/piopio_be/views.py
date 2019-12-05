@@ -365,9 +365,13 @@ class PostView(viewsets.ModelViewSet):
             post = self.get_queryset().filter(id=postpk)
             parent = post.get().parent.all()
             child = self.get_queryset().filter(parent__id__exact=postpk)
-            parent_rslt = self.get_serializer(parent.get()).data
+            parent_rslt = []
+            child_rslt = []
+            if parent:
+                parent_rslt = self.get_serializer(parent.get()).data
+            if child:
+                child_rslt = [self.get_serializer(_child).data for _child in child]
             post_rslt = self.get_serializer(post.get()).data
-            child_rslt = [self.get_serializer(_child).data for _child in child]
             data = {
                 "Details": {
                     "parent": parent_rslt,
