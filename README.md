@@ -1829,11 +1829,13 @@ Authorization: Bearer <access token>
 ```
 Response:
 ```
+200 OK
 {
     "message": "User blocked"
 }
 ```
 ```
+404 Not Found
 {
     "message": "Specified user could not be found"
 }
@@ -1848,11 +1850,13 @@ Authorization: Bearer <access token>
 ```
 Response:
 ```
+200 OK
 {
     "message": "User unblocked"
 }
 ```
 ```
+404 Not Found
 {
     "message": "Specified user could not be found"
 }
