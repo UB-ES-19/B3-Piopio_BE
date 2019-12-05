@@ -1,7 +1,7 @@
 # API serializers
 from drf_writable_nested import WritableNestedModelSerializer
 from rest_framework import serializers, exceptions
-from piopio_be.models import User, Profile, Post, Media, Notification
+from piopio_be.models import User, Profile, Post, Media, Notification, TrendingTopic
 from django.contrib.auth.password_validation import validate_password
 from django.core import exceptions
 
@@ -149,6 +149,14 @@ class PostSerializerWithUser(serializers.ModelSerializer):
         fields = ('id', 'content', 'type', 'media', 'user', 'created_at', 'favorited_count', 'retweeted_count', 'mentions')
         model = Post
 
+class PostSerializerWithParent(serializers.ModelSerializer):
+    user = UserDefaultSerializer(read_only=True)
+    media = MediaSerializer(read_only=True, source="media_set", many=True)
+    mentions = EachUserSerializer(many=True, read_only=True)
+
+    class Meta:
+        fields = ('id', 'content', 'type', 'media', 'user', 'created_at', 'favorited_count', 'retweeted_count', 'mentions','parent')
+        model = Post
 
 class PostSerializerWLikedRetweet(serializers.ModelSerializer):
     liked = serializers.CharField()
@@ -203,3 +211,10 @@ class NotificationsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Notification
         fields = ('user_mentioning', 'user_mentioned', 'post', 'notified')
+
+
+class TrendingTopicSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = TrendingTopic
+        fields = ('hashtag', 'count',)
