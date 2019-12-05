@@ -131,8 +131,7 @@ Response
                     1
                 ]
             },
-            "created_at": "2019-11-18T17:41:53.561843Z",
-            "mentions" : []
+            "created_at": "2019-11-18T17:41:53.561843Z"
         },
         {
             "id": 6,
@@ -160,8 +159,7 @@ Response
                     1
                 ]
             },
-            "created_at": "2019-11-18T17:41:41.767335Z",
-            "mentions": []
+            "created_at": "2019-11-18T17:41:41.767335Z"
         }
     ]
 }
@@ -193,6 +191,28 @@ Content-Type: application/json
 
 {
     "message": "UNRETWEETED!"
+}
+```
+#### REPORT A POST:
+```
+POST /api/users/report/{post_id}/
+Host: localhost:8000
+Content-Type: application/json
+Authorization: Bearer <access token>
+```
+Response
+
+```
+HTTP 200 OK
+{
+    "message": "reported!"
+}
+```
+
+```
+HTTP 404 NOT FOUND
+{
+    "detail": "Not found."
 }
 ```
 
@@ -237,8 +257,7 @@ Response
                     1
                 ]
             },
-            "created_at": "2019-11-18T17:41:53.561843Z",
-            "mentions": []
+            "created_at": "2019-11-18T17:41:53.561843Z"
         },
         {
             "id": 6,
@@ -266,8 +285,7 @@ Response
                     1
                 ]
             },
-            "created_at": "2019-11-18T17:41:41.767335Z",
-            "mentions": []
+            "created_at": "2019-11-18T17:41:41.767335Z"
         }
     ]
 }
@@ -801,6 +819,209 @@ Response
 ```
 
 # Posts
+
+#### Reply a post :
+
+```
+POST /api/posts/{post_id}/reply/
+Host: localhost:8000
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer <access token>
+body:
+{
+    "content": "<content>"
+    "type": "<text, image or video>",
+    "media" : [
+    	{
+    		"url": "http://..."
+    	}
+    ]
+}
+```
+Response
+```
+HTTP 201 Created
+{
+    "id": 53,
+    "content": "replyto 29",
+    "type": "<text>",
+    "media": [],
+    "user": {
+        "id": 1,
+        "username": "test",
+        "email": "test@gmail.com",
+        "profile": {
+            "first_name": "user",
+            "last_name": "user",
+            "banner_url": "",
+            "avatar_url": "",
+            "birthday": null,
+            "description": ""
+        },
+        "following_count": 0,
+        "follower_count": 0,
+        "followers": [],
+        "following": []
+    },
+    "created_at": "2019-12-03T19:11:03.802036Z",
+    "favorited_count": 0,
+    "retweeted_count": 0,
+    "mentions": []
+}
+```
+
+#### Get post and it's parent and childs (with pagination):
+
+```
+GET /api/posts/details/{post_id}/
+Host: localhost:8000
+Content-Type: application/json
+```
+Response
+```
+{
+    "Details": {
+        "parent": {
+            "id": 42,
+            "content": "replyto 29",
+            "type": "<text>",
+            "media": [],
+            "user": {
+                "id": 1,
+                "username": "onebu",
+                "email": "onebu@gmail.com",
+                "profile": {
+                    "first_name": "user",
+                    "last_name": "user",
+                    "banner_url": "",
+                    "avatar_url": "",
+                    "birthday": null,
+                    "description": ""
+                },
+                "following_count": 0,
+                "follower_count": 0,
+                "followers": [],
+                "following": []
+            },
+            "created_at": "2019-12-03T13:17:36.077154Z",
+            "favorited_count": 0,
+            "retweeted_count": 0,
+            "mentions": []
+        },
+        "post": {
+            "id": 48,
+            "content": "replyto 29",
+            "type": "<text>",
+            "media": [],
+            "user": {
+                "id": 1,
+                "username": "onebu",
+                "email": "onebu@gmail.com",
+                "profile": {
+                    "first_name": "user",
+                    "last_name": "user",
+                    "banner_url": "",
+                    "avatar_url": "",
+                    "birthday": null,
+                    "description": ""
+                },
+                "following_count": 0,
+                "follower_count": 0,
+                "followers": [],
+                "following": []
+            },
+            "created_at": "2019-12-03T13:20:30.767622Z",
+            "favorited_count": 0,
+            "retweeted_count": 0,
+            "mentions": []
+        },
+        "childs": [
+            {
+                "id": 53,
+                "content": "replyto 29",
+                "type": "<text>",
+                "media": [],
+                "user": {
+                    "id": 1,
+                    "username": "onebu",
+                    "email": "onebu@gmail.com",
+                    "profile": {
+                        "first_name": "user",
+                        "last_name": "user",
+                        "banner_url": "",
+                        "avatar_url": "",
+                        "birthday": null,
+                        "description": ""
+                    },
+                    "following_count": 0,
+                    "follower_count": 0,
+                    "followers": [],
+                    "following": []
+                },
+                "created_at": "2019-12-03T19:11:03.802036Z",
+                "favorited_count": 0,
+                "retweeted_count": 0,
+                "mentions": []
+            },
+            {
+                "id": 52,
+                "content": "replyto 29",
+                "type": "<text>",
+                "media": [],
+                "user": {
+                    "id": 1,
+                    "username": "onebu",
+                    "email": "onebu@gmail.com",
+                    "profile": {
+                        "first_name": "user",
+                        "last_name": "user",
+                        "banner_url": "",
+                        "avatar_url": "",
+                        "birthday": null,
+                        "description": ""
+                    },
+                    "following_count": 0,
+                    "follower_count": 0,
+                    "followers": [],
+                    "following": []
+                },
+                "created_at": "2019-12-03T14:11:27.064334Z",
+                "favorited_count": 0,
+                "retweeted_count": 0,
+                "mentions": []
+            },
+            {
+                "id": 51,
+                "content": "replyto 29",
+                "type": "<text>",
+                "media": [],
+                "user": {
+                    "id": 1,
+                    "username": "onebu",
+                    "email": "onebu@gmail.com",
+                    "profile": {
+                        "first_name": "user",
+                        "last_name": "user",
+                        "banner_url": "",
+                        "avatar_url": "",
+                        "birthday": null,
+                        "description": ""
+                    },
+                    "following_count": 0,
+                    "follower_count": 0,
+                    "followers": [],
+                    "following": []
+                },
+                "created_at": "2019-12-03T14:02:23.310217Z",
+                "favorited_count": 0,
+                "retweeted_count": 0,
+                "mentions": []
+            }
+        ]
+    }
+}
+```
 #### Get All Posts (with pagination):
 
 ```
@@ -814,136 +1035,35 @@ HTTP 200 OK
 Content-Type: application/json
 
 {
-    "count": 17,
+    "count": 4,
     "next": null,
     "previous": null,
     "results": [
         {
-            "id": 17,
-            "content": "@qwer eres un pesao",
+            "id": 4,
+            "content": "antonio",
             "type": "text",
             "media": [],
             "user": {
-                "id": 3,
-                "username": "sutikcram",
-                "email": "sutic2o@gmail.com",
+                "id": 4,
+                "username": "qwer",
+                "email": "qwer@gmail.com",
                 "profile": {
-                    "first_name": "sutico",
-                    "last_name": "el cramo",
+                    "first_name": "qwer",
+                    "last_name": "qwer",
                     "banner_url": "",
                     "avatar_url": "",
                     "birthday": null,
                     "description": ""
                 },
                 "following_count": 0,
-                "follower_count": 1,
-                "followers": [
-                    6
-                ],
-                "following": [
-                    6
-                ]
-            },
-            "created_at": "2019-11-30T15:05:25.288285Z",
-            "favorited_count": 0,
-            "retweeted_count": 0,
-            "mentions": [
-                {
-                    "id": 4,
-                    "username": "qwer"
-                }
-            ]
-        },
-        {
-            "id": 16,
-            "content": "@sutikcram @sutikcram @sutikcram",
-            "type": "text",
-            "media": [],
-            "user": {
-                "id": 4,
-                "username": "qwer",
-                "email": "qwer@gmail.com",
-                "profile": {
-                    "first_name": "qwer",
-                    "last_name": "qwer",
-                    "banner_url": "idjjsih8q3wennneyvpi",
-                    "avatar_url": "euvuhkvjfsaubsz0i3ph",
-                    "birthday": "1970-01-01T00:00:00Z",
-                    "description": "soy una iguana"
-                },
-                "following_count": 0,
                 "follower_count": 0,
                 "followers": [],
                 "following": []
             },
-            "created_at": "2019-11-30T13:50:10.098667Z",
+            "created_at": "2019-11-24T19:56:24.040166Z",
             "favorited_count": 0,
-            "retweeted_count": 0,
-            "mentions": [
-                {
-                    "id": 3,
-                    "username": "sutikcram"
-                }
-            ]
-        },
-        {
-            "id": 15,
-            "content": "@sutikcram, eres un grande",
-            "type": "text",
-            "media": [],
-            "user": {
-                "id": 4,
-                "username": "qwer",
-                "email": "qwer@gmail.com",
-                "profile": {
-                    "first_name": "qwer",
-                    "last_name": "qwer",
-                    "banner_url": "idjjsih8q3wennneyvpi",
-                    "avatar_url": "euvuhkvjfsaubsz0i3ph",
-                    "birthday": "1970-01-01T00:00:00Z",
-                    "description": "soy una iguana"
-                },
-                "following_count": 0,
-                "follower_count": 0,
-                "followers": [],
-                "following": []
-            },
-            "created_at": "2019-11-30T13:49:23.393608Z",
-            "favorited_count": 0,
-            "retweeted_count": 0,
-            "mentions": [
-                {
-                    "id": 3,
-                    "username": "sutikcram"
-                }
-            ]
-        },
-        {
-            "id": 14,
-            "content": "@yo soy",
-            "type": "text",
-            "media": [],
-            "user": {
-                "id": 4,
-                "username": "qwer",
-                "email": "qwer@gmail.com",
-                "profile": {
-                    "first_name": "qwer",
-                    "last_name": "qwer",
-                    "banner_url": "idjjsih8q3wennneyvpi",
-                    "avatar_url": "euvuhkvjfsaubsz0i3ph",
-                    "birthday": "1970-01-01T00:00:00Z",
-                    "description": "soy una iguana"
-                },
-                "following_count": 0,
-                "follower_count": 0,
-                "followers": [],
-                "following": []
-            },
-            "created_at": "2019-11-30T13:48:35.589221Z",
-            "favorited_count": 0,
-            "retweeted_count": 0,
-            "mentions": []
+            "retweeted_count": 1
         }
     ]
 }
@@ -989,14 +1109,12 @@ Response
             "liked": "false",
             "retweeted": "true",
             "favorited_count": 0,
-            "retweeted_count": 0,
-            "mentions": []
+            "retweeted_count": 0
         }
     ]
 }
 ```
 #### Get Post by ID:
-
 ```
 GET /api/posts/<post_id>
 Host: localhost:8000
@@ -1031,8 +1149,7 @@ Content-Type: application/json
     },
     "created_at": "2019-11-24T19:24:50.246753Z",
     "favorited_count": 0,
-    "retweeted_count": 0,
-    "mentions": []
+    "retweeted_count": 0
 }
 ```
 ```
@@ -1230,8 +1347,7 @@ Content-Type: application/json
             "liked": "false",
             "retweeted": "true",
             "favorited_count": 0,
-            "retweeted_count": 1,
-            "mentions": []
+            "retweeted_count": 1
         },
         {
             "id": 3,
@@ -1259,8 +1375,7 @@ Content-Type: application/json
             "liked": "false",
             "retweeted": "true",
             "favorited_count": -1,
-            "retweeted_count": 0,
-            "mentions": []
+            "retweeted_count": 0
         },
         {
             "id": 2,
@@ -1288,8 +1403,7 @@ Content-Type: application/json
             "liked": "false",
             "retweeted": "true",
             "favorited_count": 0,
-            "retweeted_count": 0,
-            "mentions": []
+            "retweeted_count": 0
         },
         {
             "id": 1,
@@ -1317,8 +1431,7 @@ Content-Type: application/json
             "liked": "true",
             "retweeted": "true",
             "favorited_count": 0,
-            "retweeted_count": 0,
-            "mentions": []
+            "retweeted_count": 0
         }
     ]
 }
@@ -1374,8 +1487,7 @@ Content-Type: application/json
             "liked": "false",
             "retweeted": "false",
             "favorited_count": 0,
-            "retweeted_count": 1,
-            "mentions": []
+            "retweeted_count": 1
         },
         {
             "id": 3,
@@ -1403,8 +1515,7 @@ Content-Type: application/json
             "liked": "false",
             "retweeted": "false",
             "favorited_count": -1,
-            "retweeted_count": 0,
-            "mentions": []
+            "retweeted_count": 0
         }
     ]
 }
@@ -1417,6 +1528,7 @@ Content-Type: application/json
     "detail": "Authentication credentials were not provided."
 }
 ```
+
 #### Get all notifications
 ```
 GET /api/notifications/

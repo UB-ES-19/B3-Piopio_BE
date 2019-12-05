@@ -13,6 +13,7 @@ from piopio_be.django_custom_join import join_to_queryset
 # Create your views here.
 from django.db.models import Case, When, Q
 
+
 class UserView(viewsets.ModelViewSet):
     queryset = models.User.objects.all()
     serializer_class = serializers.UserDefaultSerializer
@@ -144,7 +145,8 @@ class UserView(viewsets.ModelViewSet):
 
         posts = add_likes_and_retweets(posts, user)
         page = self.paginate_queryset(posts)
-        serialized_posts = serializers.PostSerializerWLikedRetweet(page, many=True)
+        serialized_posts = serializers.PostSerializerWLikedRetweet(
+            page, many=True)
         return self.get_paginated_response(serialized_posts.data)
 
     @action(methods=['GET'], detail=False, url_path="(?P<userpk>[^/.]+)/retweeted", url_name="user_retweeted")
@@ -159,7 +161,8 @@ class UserView(viewsets.ModelViewSet):
 
         posts = add_likes_and_retweets(posts, user)
         page = self.paginate_queryset(posts)
-        serialized_posts = serializers.PostSerializerWLikedRetweet(page, many=True)
+        serialized_posts = serializers.PostSerializerWLikedRetweet(
+            page, many=True)
         return self.get_paginated_response(serialized_posts.data)
 
     @action(methods=['GET'], detail=False, permission_classes=(IsAuthenticated,),
@@ -174,31 +177,57 @@ class UserView(viewsets.ModelViewSet):
             print(_user)
             related.append(_user['id'])
 
-        #user = request.user
         related.append(userpk)
-        posts = models.Post.objects.filter(user_id__in=related).order_by('-created_at')
+        posts = models.Post.objects.filter(
+            user_id__in=related).order_by('-created_at')
         posts = add_likes_and_retweets(posts, userpk)
 
-        page = self.paginate_queryset(posts)
-        serialized_posts = serializers.PostSerializerWLikedRetweet(page, many=True)
+        """
+        Filter the results with user's report list
+        """
+        user = self.queryset.get(pk=request.user.pk)
+        reported = user.reported.all().values_list('id')
+        filtered = posts.all().exclude(id__in=reported)
+
+        page = self.paginate_queryset(filtered)
+        serialized_posts = serializers.PostSerializerWLikedRetweet(
+            page, many=True)
         return self.get_paginated_response(serialized_posts.data)
 
     @action(methods=['GET'], detail=False, url_path="notifications", permission_classes=(IsAuthenticated,), url_name="user_notifications")
     def notifications(self, request):
-        user_notifications = models.Notification.objects.filter(user_mentioned=request.user)
+        user_notifications = models.Notification.objects.filter(
+            user_mentioned=request.user)
         page = self.paginate_queryset(user_notifications)
         serialized_users = serializers.NotificationsSerializer(page, many=True)
         return self.get_paginated_response(serialized_users.data)
 
+    @action(methods=['POST'], detail=False, url_path="report/(?P<postpk>[^/.]+)", permission_classes=(IsAuthenticated,), url_name="user_report")
+    def report(self, request, postpk):
+        try:
+            user = self.queryset.get(pk=request.user.pk)
+            post = get_object_or_404(models.Post, pk=postpk)
+            user.reported.add(post.id)
+            return Response({'message':'reported!'}, status=status.HTTP_201_CREATED)
+        except ValueError:
+            return Response({'message': 'Something went wrong!'}, status.HTTP_404_NOT_FOUND)
+        except models.User.DoesNotExist:
+            return Response({'message': 'Something went wrong!'}, status.HTTP_404_NOT_FOUND)
+        
+
 
 def add_likes_and_retweets(posts, user, sort=True):
     # Add liked field
-    liked_posts = models.LikedTable.objects.filter(user=user).values_list('post', flat=True)
-    posts = posts.annotate(liked=Case(When(id__in=liked_posts, then=Value('true')), default=Value('false'), output_field=CharField()))
+    liked_posts = models.LikedTable.objects.filter(
+        user=user).values_list('post', flat=True)
+    posts = posts.annotate(liked=Case(When(id__in=liked_posts, then=Value(
+        'true')), default=Value('false'), output_field=CharField()))
 
     # Add retweeted field
-    retweeted_posts = models.RetweetedTable.objects.filter(user=user).values_list('post', flat=True)
-    posts = posts.annotate(retweeted=Case(When(id__in=retweeted_posts, then=Value('true')), default=Value('false'), output_field=CharField()))
+    retweeted_posts = models.RetweetedTable.objects.filter(
+        user=user).values_list('post', flat=True)
+    posts = posts.annotate(retweeted=Case(When(id__in=retweeted_posts, then=Value(
+        'true')), default=Value('false'), output_field=CharField()))
 
     if sort:
         posts = posts.order_by('-created_at')
@@ -209,8 +238,8 @@ def add_likes_and_retweets(posts, user, sort=True):
 def sort_posts_and_retweets(posts, retweets, ids, user):
     posts = posts | retweets
     posts = posts.annotate(sort_date=Case(When(id__in=ids,
-            then=Subquery(models.RetweetedTable.objects.filter(post=OuterRef('id')).filter(user=user)[:1].values_list('retweeted_date', flat=True))),
-            default=F('created_at'), output_field=DateTimeField()))
+                                               then=Subquery(models.RetweetedTable.objects.filter(post=OuterRef('id')).filter(user=user)[:1].values_list('retweeted_date', flat=True))),
+                                          default=F('created_at'), output_field=DateTimeField()))
 
     posts = posts.order_by('-sort_date')
     return posts
@@ -228,12 +257,14 @@ class PostsFromUserView(viewsets.ReadOnlyModelViewSet):
         retweets = models.RetweetedTable.objects.filter(user=user_pk)
         ids = retweets.values_list('post', flat=True)
 
-        posts = sort_posts_and_retweets(posts, self.get_queryset().filter(id__in=ids), ids, user_pk)
+        posts = sort_posts_and_retweets(
+            posts, self.get_queryset().filter(id__in=ids), ids, user_pk)
 
         posts = add_likes_and_retweets(posts, request.user, sort=False)
 
         page = self.paginate_queryset(posts)
-        serialized_posts = serializers.PostSerializerWLikedRetweet(page, many=True)
+        serialized_posts = serializers.PostSerializerWLikedRetweet(
+            page, many=True)
         return self.get_paginated_response(serialized_posts.data)
 
     def retrieve(self, request, pk=None, user_pk=None, *args, **kwargs):
@@ -259,6 +290,14 @@ class PostView(viewsets.ModelViewSet):
             return serializers.PostSerializer
         return serializers.PostSerializerWithUser
 
+    def get_serializer_with_parent(self):
+        return serializers.PostSerializerWithParent
+
+    def get_serializer_parent(self, *args, **kwargs):
+        serializer_class = self.get_serializer_with_parent()
+        kwargs['context'] = self.get_serializer_context()
+        return serializer_class(*args, **kwargs)
+
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -269,7 +308,8 @@ class PostView(viewsets.ModelViewSet):
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer = self.get_serializer(
+            instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
         serializer.save(user_id=request.user.pk)
         if getattr(instance, '_prefetched_objects_cache', None):
@@ -285,11 +325,13 @@ class PostView(viewsets.ModelViewSet):
         """
         user = request.user
         posts = self.get_queryset().filter(user_id=user.pk)
-        ids = models.RetweetedTable.objects.filter(user=user).values_list('post', flat=True)
+        ids = models.RetweetedTable.objects.filter(
+            user=user).values_list('post', flat=True)
         posts = posts | self.get_queryset().filter(id__in=ids)
         posts = add_likes_and_retweets(posts, user)
         page = self.paginate_queryset(posts)
-        serialized_posts = serializers.PostSerializerWLikedRetweet(page, many=True)
+        serialized_posts = serializers.PostSerializerWLikedRetweet(
+            page, many=True)
         return self.get_paginated_response(serialized_posts.data)
 
     @action(methods=['GET'], detail=False, url_path="search", url_name="posts_search")
@@ -299,22 +341,73 @@ class PostView(viewsets.ModelViewSet):
             contents = content.split(" ")
             posts_queryset = self.queryset
 
+            """
+            Filter the results with user's report list
+            """
+            user = self.queryset.get(pk=request.user.pk)
+            reported = user.reported.all().values_list('id')
+
             for content in contents:
-                posts_queryset = posts_queryset.filter(content__icontains=content)
+                posts_queryset = posts_queryset.filter(
+                    content__icontains=content).exclude(id__in=reported) #Search result excluded reported post
 
         except ValueError:
             return Response({'content': 'Not specified'}, status.HTTP_404_NOT_FOUND)
 
         posts_queryset = add_likes_and_retweets(posts_queryset, request.user)
         page = self.paginate_queryset(posts_queryset)
-        serialized_posts = serializers.PostSerializerWLikedRetweet(page, many=True)
+        serialized_posts = serializers.PostSerializerWLikedRetweet(
+            page, many=True)
         return self.get_paginated_response(serialized_posts.data)
 
+    @action(methods=['GET'], detail=False, url_path="details/(?P<postpk>[^/.]+)", url_name="detail_post")
+    def details(self, request, postpk):
+        try:
+            post = self.get_queryset().filter(id=postpk)
+            parent = post.get().parent.all()
+            child = self.get_queryset().filter(parent__id__exact=postpk)
+            parent_rslt = []
+            child_rslt = []
+            if parent:
+                parent_rslt = self.get_serializer(parent.get()).data
+            if child:
+                child_rslt = [self.get_serializer(_child).data for _child in child]
+            post_rslt = self.get_serializer(post.get()).data
+            data = {
+                "details": {
+                    "parent": parent_rslt,
+                    "post": post_rslt,
+                    "childs": child_rslt
+                }
+            }
+            return Response(data)
+
+        except ValueError:
+            return Response({'message': 'Something went wrong!'}, status.HTTP_404_NOT_FOUND)
+
+    @action(methods=['POST'], detail=False, url_path="(?P<postpk>[^/.]+)/reply", permission_classes=(IsAuthenticated,), url_name="reply_post")
+    def reply(self, request, postpk):
+        try:
+            parent = self.get_queryset().filter(id=postpk)
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save(user_id=request.user.pk)
+            headers = self.get_success_headers(serializer.data)
+            child_id = serializer.data['id']
+            tmp = self.get_queryset().filter(id=child_id)
+            tmp.get().parent.add(parent.get().id)
+            tmp.get().save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+        except ValueError:
+            return Response({'message': 'Something went wrong!'}, status.HTTP_404_NOT_FOUND)
+        except models.Post.DoesNotExist:
+            return Response({'message': 'Something went wrong!'}, status.HTTP_404_NOT_FOUND)
 
 
 class UserFollowerView(viewsets.GenericViewSet,
-                      mixins.RetrieveModelMixin,
-                      mixins.ListModelMixin):
+                       mixins.RetrieveModelMixin,
+                       mixins.ListModelMixin):
     """
        Viewset to return all the nested friendship relations.
     """
@@ -324,7 +417,7 @@ class UserFollowerView(viewsets.GenericViewSet,
     def get_serializer_class(self):
         if self.action == 'list':
             return serializers.FollowerSerializer
-        else: # retrieve
+        else:  # retrieve
             return serializers.UserDefaultSerializer
 
     def retrieve(self, request, *args, **kwargs):
@@ -336,8 +429,8 @@ class UserFollowerView(viewsets.GenericViewSet,
 
 
 class UserFollwoingView(viewsets.GenericViewSet,
-                      mixins.RetrieveModelMixin,
-                      mixins.ListModelMixin):
+                        mixins.RetrieveModelMixin,
+                        mixins.ListModelMixin):
     """
        Viewset to return all the nested friendship relations.
     """
@@ -347,7 +440,7 @@ class UserFollwoingView(viewsets.GenericViewSet,
     def get_serializer_class(self):
         if self.action == 'list':
             return serializers.FollowingSerializer
-        else: # retrieve
+        else:  # retrieve
             return serializers.UserDefaultSerializer
 
     def retrieve(self, request, *args, **kwargs):
@@ -359,7 +452,7 @@ class UserFollwoingView(viewsets.GenericViewSet,
 
 
 class UserNestedFollowerView(viewsets.GenericViewSet,
-                      mixins.ListModelMixin):
+                             mixins.ListModelMixin):
     """
     Nested view for retrieving and listing the posts of a user
     """
@@ -399,7 +492,8 @@ class NotificationsView(viewsets.GenericViewSet,
     def notified(self, request):
         try:
             post_id = request.data.get('post')
-            notification = self.queryset.get(user_mentioned=request.user, post__id=post_id)
+            notification = self.queryset.get(
+                user_mentioned=request.user, post__id=post_id)
         except ValueError:
             return Response({'post': 'Not specified'}, status.HTTP_404_NOT_FOUND)
         except models.Notification.DoesNotExist:
@@ -410,7 +504,6 @@ class NotificationsView(viewsets.GenericViewSet,
         serialized_notification = self.get_serializer(notification)
 
         return Response(serialized_notification.data)
-
 
 class TrendingTopicView(viewsets.GenericViewSet, mixins.ListModelMixin):
 
