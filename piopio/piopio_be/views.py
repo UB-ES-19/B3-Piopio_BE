@@ -37,7 +37,7 @@ class UserView(viewsets.ModelViewSet):
         queryset = self.filter_queryset(self.get_queryset())
         user_id = request.user.id
 
-        # if request.user:
+        # if request.user.is_authenticated:
         #     queryset = queryset.annotate(blocked=Subquery(len(models.User.blocked_users.
         #                                                   through.objects.filter(to_user__id=OuterRef('pk'))
         #                                                   .filter(from_user__id=user_id)), output_field=BooleanField()))
@@ -58,13 +58,16 @@ class UserView(viewsets.ModelViewSet):
         if q is None:
             return Response({'detail': 'User Not Found'}, status.HTTP_404_NOT_FOUND)
 
-        if request.user:
+        if request.user.is_authenticated:
             if kwargs['pk'].isdigit():
                 q.user_blocked=(models.User.blocked_users.through.objects.filter(to_user__id=kwargs['pk']).filter(from_user=request.user)).exists()
                 q.other_blocked=(models.User.blocked_users.through.objects.filter(to_user=request.user).filter(from_user__id=kwargs['pk'])).exists()
             else:
                 q.user_blocked = (models.User.blocked_users.through.objects.filter(to_user__username=kwargs['pk']).filter(from_user=request.user)).exists()
                 q.other_blocked = (models.User.blocked_users.through.objects.filter(to_user=request.user).filter(from_user__username=kwargs['pk'])).exists()
+        else:
+            q.user_blocked = False
+            q.other_blocked = False
 
         s = serializers.UserBlockedSerializers(q)
         return Response(s.data)
@@ -166,14 +169,14 @@ class UserView(viewsets.ModelViewSet):
         posts_liked = filtered_posts.values_list('post', flat=True)
         sorted_posts = filtered_posts.order_by('post_id')
         posts = models.Post.objects.filter(id__in=posts_liked)
-        if request.user:
+        if request.user.is_authenticated:
             posts = posts.filter_blocked(request.user)
             # TODO: sort by liked date
 
             posts = add_likes_and_retweets(posts, user)
 
         page = self.paginate_queryset(posts)
-        if request.user:
+        if request.user.is_authenticated:
             serialized_posts = serializers.PostSerializerWLikedRetweetMentions(
                 page, many=True)
         else:
@@ -189,14 +192,14 @@ class UserView(viewsets.ModelViewSet):
         posts_retweeted = filtered_posts.values_list('post', flat=True)
         sorted_posts = filtered_posts.order_by('post_id')
         posts = models.Post.objects.filter(id__in=posts_retweeted)
-        if request.user:
+        if request.user.is_authenticated:
             posts = posts.filter_blocked(request.user)
             # TODO: sort by retweeted date
 
             posts = add_likes_and_retweets(posts, user)
 
         page = self.paginate_queryset(posts)
-        if request.user:
+        if request.user.is_authenticated:
             serialized_posts = serializers.PostSerializerWLikedRetweetMentions(
                 page, many=True)
         else:
@@ -243,44 +246,48 @@ class UserView(viewsets.ModelViewSet):
     @action(methods=['POST'], detail=False, url_path="(?P<user_pk>[^/.]+)/block", permission_classes=(IsAuthenticated,),
             url_name="user_block")
     def block(self, request, user_pk):
-        try:
-            user_to_block = models.User.objects.get(pk=user_pk)
+        if user_pk != str(request.user.pk):
+            try:
+                user_to_block = models.User.objects.get(pk=user_pk)
 
-            if user_to_block in request.user.blocked_users.all():
-                return Response({'message': "User already blocked"})
+                if user_to_block in request.user.blocked_users.all():
+                    return Response({'message': "User already blocked"})
 
-            request.user.blocked_users.add(user_to_block)
+                request.user.blocked_users.add(user_to_block)
 
-            # Remove following if exists
-            if user_to_block in request.user.followings.all():
-                request.user.followings.remove(user_to_block)
-                user_to_block.followers.remove(request.user)
+                # Remove following if exists
+                if user_to_block in request.user.followings.all():
+                    request.user.followings.remove(user_to_block)
+                    user_to_block.followers.remove(request.user)
 
-            # Remove follow if exists
-            if user_to_block in request.user.followers.all():
-                request.user.followers.remove(user_to_block)
-                user_to_block.followings.remove(request.user)
+                # Remove follow if exists
+                if user_to_block in request.user.followers.all():
+                    request.user.followers.remove(user_to_block)
+                    user_to_block.followings.remove(request.user)
 
-            # Remove retweets to blocked_user's posts
-            retweeted = models.RetweetedTable.objects.filter(user=request.user)
+                # Remove retweets to blocked_user's posts
+                retweeted = models.RetweetedTable.objects.filter(user=request.user)
 
-            if retweeted.exists():
-                post_ids = retweeted.values_list('post__id', flat=True)
-                posts_to_remove = models.Post.objects.filter(id__in=post_ids).filter(user=user_to_block).values_list('id', flat=True)
-                models.RetweetedTable.objects.filter(user=request.user).filter(post_id__in=posts_to_remove).delete()
+                if retweeted.exists():
+                    post_ids = retweeted.values_list('post__id', flat=True)
+                    posts_to_remove = models.Post.objects.filter(id__in=post_ids).filter(user=user_to_block).values_list('id', flat=True)
+                    models.RetweetedTable.objects.filter(user=request.user).filter(post_id__in=posts_to_remove).delete()
 
-            # Remove likes to blocked_user's posts
-            liked = models.LikedTable.objects.filter(user=request.user)
+                # Remove likes to blocked_user's posts
+                liked = models.LikedTable.objects.filter(user=request.user)
 
-            if liked.exists():
-                post_ids = liked.values_list('post__id', flat=True)
-                posts_to_remove = models.Post.objects.filter(id__in=post_ids).filter(
-                    user=user_to_block).values_list('id', flat=True)
-                models.LikedTable.objects.filter(user=request.user).filter(post_id__in=posts_to_remove).delete()
+                if liked.exists():
+                    post_ids = liked.values_list('post__id', flat=True)
+                    posts_to_remove = models.Post.objects.filter(id__in=post_ids).filter(
+                        user=user_to_block).values_list('id', flat=True)
+                    models.LikedTable.objects.filter(user=request.user).filter(post_id__in=posts_to_remove).delete()
 
-            return Response({'message': "User blocked"})
-        except models.User.DoesNotExist:
-            return Response({'message': "Specified user could not be found"}, status.HTTP_404_NOT_FOUND)
+                return Response({'message': "User blocked"})
+            except models.User.DoesNotExist:
+                return Response({'message': "Specified user could not be found"}, status.HTTP_404_NOT_FOUND)
+        else:
+            return Response({'message': "You can't block yourself"}, status.HTTP_400_BAD_REQUEST)
+
 
     @action(methods=['POST'], detail=False, url_path="(?P<user_pk>[^/.]+)/unblock", permission_classes=(IsAuthenticated,),
             url_name="user_unblock")
@@ -349,23 +356,23 @@ class PostsFromUserView(viewsets.ReadOnlyModelViewSet):
 
     def list(self, request, user_pk=None, *args, **kwargs):
         posts = self.get_queryset().filter(user_id=user_pk)
-        if request.user:
+        if request.user.is_authenticated:
             posts = posts.filter_blocked(request.user)
         retweets = models.RetweetedTable.objects.filter(user=user_pk)
         ids = retweets.values_list('post', flat=True)
 
 
         rets = self.get_queryset().filter(id__in=ids)
-        if request.user:
+        if request.user.is_authenticated:
             rets = rets.filter_blocked(request.user)
         posts = sort_posts_and_retweets(posts, rets, ids, user_pk)
 
-        if request.user:
+        if request.user.is_authenticated:
             posts = add_likes_and_retweets(posts, request.user, sort=False)
 
         page = self.paginate_queryset(posts)
 
-        if request.user:
+        if request.user.is_authenticated:
             serialized_posts = serializers.PostSerializerWLikedRetweetMentions(
                 page, many=True)
         else:
@@ -375,13 +382,13 @@ class PostsFromUserView(viewsets.ReadOnlyModelViewSet):
 
     def retrieve(self, request, pk=None, user_pk=None, *args, **kwargs):
         posts = self.get_queryset()
-        if request.user:
+        if request.user.is_authenticated:
             posts = posts.filter_blocked(request.user)
             posts = add_likes_and_retweets(posts, request.user, sort=False)
 
         try:
             posts = posts.get(pk=pk)
-            if request.user:
+            if request.user.is_authenticated:
                 serialized_posts = serializers.PostSerializerWLikedRetweetMentions(posts)
             else:
                 serialized_posts = serializers.PostSerializerWithUser(posts)
@@ -389,6 +396,12 @@ class PostsFromUserView(viewsets.ReadOnlyModelViewSet):
         except models.Post.DoesNotExist:
             return Response({"message": "Post not found"}, status.HTTP_404_NOT_FOUND)
 
+def add_info_posts(post_list, user):
+    if user.is_authenticated:
+        for idx in range(len(post_list)):
+            post_list[idx] = post_list[idx].filter_blocked(user)
+            post_list[idx] = add_likes_and_retweets(post_list[idx], user, sort=False)
+    return post_list
 
 class PostView(viewsets.ModelViewSet):
     queryset = models.Post.objects.all().order_by('-created_at')
@@ -405,13 +418,13 @@ class PostView(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
 
-        if request.user:
+        if request.user.is_authenticated:
             queryset = add_likes_and_retweets(queryset, request.user, sort=False)
             queryset = queryset.filter_blocked(request.user)
 
         page = self.paginate_queryset(queryset)
 
-        if request.user:
+        if request.user.is_authenticated:
             serializer = serializers.PostSerializerWLikedRetweetMentions(queryset, many=True)
         else:
             serializer = self.get_serializer(queryset, many=True)
@@ -419,13 +432,13 @@ class PostView(viewsets.ModelViewSet):
 
     def retrieve(self, request, *args, **kwargs):
         instance = models.Post.objects.filter(pk=kwargs['pk'])
-        if request.user:
+        if request.user.is_authenticated:
             queryset = add_likes_and_retweets(instance, request.user, sort=False)
             queryset = queryset.filter_blocked(request.user)
 
         queryset = queryset.first()
 
-        if request.user:
+        if request.user.is_authenticated:
             serializer = serializers.PostSerializerWLikedRetweetMentions(queryset)
         else:
             serializer = self.get_serializer(queryset)
@@ -489,7 +502,7 @@ class PostView(viewsets.ModelViewSet):
             contents = content.split(" ")
             posts_queryset = self.queryset
 
-            if request.user:
+            if request.user.is_authenticated:
                 posts_queryset = posts_queryset.filter_blocked(request.user)
 
             reported = request.user.reported.all().values_list('id')
@@ -502,11 +515,11 @@ class PostView(viewsets.ModelViewSet):
         except ValueError:
             return Response({'content': 'Not specified'}, status.HTTP_404_NOT_FOUND)
 
-        if request.user:
+        if request.user.is_authenticated:
             posts_queryset = add_likes_and_retweets(posts_queryset, request.user)
         page = self.paginate_queryset(posts_queryset)
 
-        if request.user:
+        if request.user.is_authenticated:
             serialized_posts = serializers.PostSerializerWLikedRetweetMentions(
                 page, many=True)
         else:
@@ -520,13 +533,23 @@ class PostView(viewsets.ModelViewSet):
             post = self.get_queryset().filter(id=postpk)
             parent = post.get().parent.all()
             child = self.get_queryset().filter(parent__id__exact=postpk)
+
+            parent, post, child = add_info_posts([parent, post, child], request.user)
+
+            if request.user.is_authenticated:
+                serializer = serializers.PostSerializerWLikedRetweetMentions
+            else:
+                serializer = serializers.PostSerializerWithParentLikesRt
+
             parent_rslt = []
             child_rslt = []
+            post_rslt = {}
             if parent:
-                parent_rslt = self.get_serializer(parent.get()).data
+                parent_rslt = serializer(parent.get()).data
             if child:
-                child_rslt = [self.get_serializer(_child).data for _child in child]
-            post_rslt = self.get_serializer(post.get()).data
+                child_rslt = [serializer(_child).data for _child in child]
+            if post:
+                post_rslt = serializer(post.get()).data
             data = {
                 "details": {
                     "parent": parent_rslt,
