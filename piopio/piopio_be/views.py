@@ -59,8 +59,12 @@ class UserView(viewsets.ModelViewSet):
             return Response({'detail': 'User Not Found'}, status.HTTP_404_NOT_FOUND)
 
         if request.user:
-            q.user_blocked=(models.User.blocked_users.through.objects.filter(to_user__id=kwargs['pk']).filter(from_user=request.user)).exists()
-            q.other_blocked=(models.User.blocked_users.through.objects.filter(to_user=request.user).filter(from_user__id=kwargs['pk'])).exists()
+            if kwargs['pk'].isdigit():
+                q.user_blocked=(models.User.blocked_users.through.objects.filter(to_user__id=kwargs['pk']).filter(from_user=request.user)).exists()
+                q.other_blocked=(models.User.blocked_users.through.objects.filter(to_user=request.user).filter(from_user__id=kwargs['pk'])).exists()
+            else:
+                q.user_blocked = (models.User.blocked_users.through.objects.filter(to_user__username=kwargs['pk']).filter(from_user=request.user)).exists()
+                q.other_blocked = (models.User.blocked_users.through.objects.filter(to_user=request.user).filter(from_user__username=kwargs['pk'])).exists()
 
         s = serializers.UserBlockedSerializers(q)
         return Response(s.data)
