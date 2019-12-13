@@ -239,6 +239,15 @@ class UserView(viewsets.ModelViewSet):
     def notifications(self, request):
         user_notifications = models.Notification.objects.filter(
             user_mentioned=request.user)
+
+        blocked_users = models.User.blocked_users.through.objects.filter(to_user=request.user).values_list(
+            'from_user_id', flat=True)
+        user_notifications = user_notifications.exclude(user_mentioning__in=blocked_users)
+
+        blocked_users = models.User.blocked_users.through.objects.filter(from_user=request.user).values_list(
+            'to_user_id', flat=True)
+        user_notifications = user_notifications.exclude(user_mentioning__in=blocked_users)
+
         page = self.paginate_queryset(user_notifications)
         serialized_users = serializers.NotificationsSerializer(page, many=True)
         return self.get_paginated_response(serialized_users.data)
@@ -396,10 +405,11 @@ class PostsFromUserView(viewsets.ReadOnlyModelViewSet):
         except models.Post.DoesNotExist:
             return Response({"message": "Post not found"}, status.HTTP_404_NOT_FOUND)
 
-def add_info_posts(post_list, user):
+def add_info_posts(post_list, user, blocks):
     if user.is_authenticated:
         for idx in range(len(post_list)):
-            post_list[idx] = post_list[idx].filter_blocked(user)
+            if blocks[idx]:
+                post_list[idx] = post_list[idx].filter_blocked(user)
             post_list[idx] = add_likes_and_retweets(post_list[idx], user, sort=False)
     return post_list
 
@@ -534,7 +544,7 @@ class PostView(viewsets.ModelViewSet):
             parent = post.get().parent.all()
             child = self.get_queryset().filter(parent__id__exact=postpk)
 
-            parent, post, child = add_info_posts([parent, post, child], request.user)
+            parent, post, child = add_info_posts([parent, post, child], request.user, [True, False, True])
 
             if request.user.is_authenticated:
                 serializer = serializers.PostSerializerWLikedRetweetMentions
@@ -549,7 +559,22 @@ class PostView(viewsets.ModelViewSet):
             if child:
                 child_rslt = [serializer(_child).data for _child in child]
             if post:
-                post_rslt = serializer(post.get()).data
+                post = post.get()
+                if request.user.is_authenticated:
+                    blocked_users_id = models.User.blocked_users.through.objects.filter(from_user=request.user).values_list('to_user_id',
+                                                                                                             flat=True)
+                    blocked_users_id2 = models.User.blocked_users.through.objects.filter(to_user=request.user).values_list('from_user_id',
+                                                                                                        flat=True)
+                    blocked_users = list(blocked_users_id) + list(blocked_users_id2)
+                    a = list(blocked_users)
+                    b = post.user_id
+
+                    post.blocked = post.user_id in list(blocked_users)
+                    post_rslt = serializers.PostSerializerWLikedRetweetMentionsReport(post).data
+                else:
+                    post.blocked = False
+                    post_rslt = serializers.PostSerializerWithParentLikesRtReport(post.get()).data
+
             data = {
                 "details": {
                     "parent": parent_rslt,
@@ -663,6 +688,11 @@ class NotificationsView(viewsets.GenericViewSet,
                         mixins.RetrieveModelMixin):
     queryset = models.Notification.objects.all()
     serializer_class = serializers.NotificationsSerializer
+    permission_classes = (permissions.PermissionMapper,)
+    has_permissions = {
+        IsAuthenticated: ['retrieve', 'list']
+    }
+
 
     @action(methods=['POST'], detail=False, permission_classes=(IsAuthenticated,), url_path="notified", url_name="notifications_notified")
     def notified(self, request):

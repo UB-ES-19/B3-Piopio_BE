@@ -947,7 +947,8 @@ Response
             "created_at": "2019-12-03T13:20:30.767622Z",
             "favorited_count": 0,
             "retweeted_count": 0,
-            "mentions": []
+            "mentions": [],
+            "blocked":true
         },
         "childs": [
             {

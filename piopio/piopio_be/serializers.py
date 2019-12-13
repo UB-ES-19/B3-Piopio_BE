@@ -53,7 +53,7 @@ class UserDefaultSerializer(WritableNestedModelSerializer):
             "following_count",
             "follower_count",
             "followers",
-            "following",
+            "followings",
             "blocked_users"
         ]
 
@@ -73,7 +73,7 @@ class UserBlockedSerializers(WritableNestedModelSerializer):
             "following_count",
             "follower_count",
             "followers",
-            "following",
+            "followings",
             "blocked_users",
             "user_blocked",
             "other_blocked"
@@ -169,6 +169,16 @@ class PostSerializerWithParentLikesRt(serializers.ModelSerializer):
         fields = ('id', 'content', 'type', 'media', 'user', 'created_at', 'favorited_count', 'retweeted_count', 'mentions','parent', 'liked', 'retweeted')
         model = Post
 
+class PostSerializerWithParentLikesRtReport(serializers.ModelSerializer):
+    user = UserDefaultSerializer(read_only=True)
+    media = MediaSerializer(read_only=True, source="media_set", many=True)
+    mentions = EachUserSerializer(many=True, read_only=True)
+    blocked = serializers.BooleanField()
+
+    class Meta:
+        fields = ('id', 'content', 'type', 'media', 'user', 'created_at', 'favorited_count', 'retweeted_count', 'mentions','parent', 'liked', 'retweeted', 'blocked')
+        model = Post
+
 class PostSerializerWLikedRetweet(serializers.ModelSerializer):
     liked = serializers.CharField()
     retweeted = serializers.CharField()
@@ -190,6 +200,17 @@ class PostSerializerWLikedRetweetMentions(serializers.ModelSerializer):
         fields = ('id', 'content', 'type', 'media', 'user', 'created_at', 'liked', 'retweeted', 'favorited_count', 'retweeted_count', 'mentions')
         model = Post
 
+class PostSerializerWLikedRetweetMentionsReport(serializers.ModelSerializer):
+    liked = serializers.CharField()
+    retweeted = serializers.CharField()
+    user = UserDefaultSerializer(read_only=True)
+    media = MediaSerializer(read_only=True, source="media_set", many=True)
+    mentions = EachUserSerializer(many=True, read_only=True)
+    blocked = serializers.BooleanField()
+
+    class Meta:
+        fields = ('id', 'content', 'type', 'media', 'user', 'created_at', 'liked', 'retweeted', 'favorited_count', 'retweeted_count', 'mentions', 'blocked')
+        model = Post
 
 class FollowerSerializer(serializers.ModelSerializer):
     followers = EachUserSerializer(many=True, read_only= True)

@@ -198,7 +198,7 @@ def post_post_save(sender, instance, **kwargs):
             user_search = User.objects.filter(username=user)
             if user_search.exists():
                 user_search = user_search.first()
-                if user_search.id not in users_notified and user_search.id not in blocked_users:
+                if user_search.id not in users_notified: #and user_search.id not in blocked_users:
                     Notification.objects.create(user_mentioning=instance.user, user_mentioned=user_search, post=instance)
                     users_notified.append(user_search.id)
 
